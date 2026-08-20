@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Clinica - Backend",
-    "description": "Semana 1: health, autenticación, coberturas. Semana 2: CRUD de sedes, especialidades, coberturas y agenda médica.",
+    "description": "Semana 1: health, autenticación, coberturas. Semana 2: CRUD de sedes, especialidades, coberturas y agenda médica. Semana 3: turnos, historial clínico y notificaciones. Correr la colección completa de punta a punta con Run Collection.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -13,7 +13,11 @@
     { "key": "sede_id", "value": "" },
     { "key": "especialidad_id", "value": "" },
     { "key": "cobertura_id", "value": "" },
-    { "key": "agenda_id", "value": "" }
+    { "key": "agenda_id", "value": "" },
+    { "key": "paciente_id_test", "value": "" },
+    { "key": "turno_id", "value": "" },
+    { "key": "turno_id_2", "value": "" },
+    { "key": "notificacion_id", "value": "" }
   ],
   "item": [
     {
@@ -43,7 +47,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 201', function () { pm.response.to.have.status(201); });"
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.datos && jsonData.datos.id) {",
+                  "  pm.collectionVariables.set('paciente_id_test', jsonData.datos.id);",
+                  "}"
                 ]
               }
             }
@@ -817,6 +825,435 @@
             "method": "DELETE",
             "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
             "url": { "raw": "{{base_url}}/agenda/{{agenda_id}}", "host": ["{{base_url}}"], "path": ["agenda", "{{agenda_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Semana 3 - Turnos, historial y notificaciones",
+      "item": [
+        {
+          "name": "Turnos - Alta paciente (201 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.datos && jsonData.datos.id) {",
+                  "  pm.collectionVariables.set('turno_id', jsonData.datos.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 1,\n  \"id_medico\": 3,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"16:00\",\n  \"nota\": \"Consulta de rutina\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+          }
+        },
+        {
+          "name": "Turnos - Alta en horario ya reservado (409 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 1,\n  \"id_medico\": 3,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"16:00\",\n  \"nota\": \"Otra consulta\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+          }
+        },
+        {
+          "name": "Turnos - Alta en horario no disponible en agenda (400 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 400', function () { pm.response.to.have.status(400); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 1,\n  \"id_medico\": 3,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"21:00\",\n  \"nota\": \"Fuera de horario\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+          }
+        },
+        {
+          "name": "Turnos - Operador solicita en sede ajena (403 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_operador}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 2,\n  \"id_medico\": 3,\n  \"id_paciente\": 2,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"17:00\",\n  \"nota\": \"En representacion\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+          }
+        },
+        {
+          "name": "Turnos - Operador solicita en representación del paciente (201 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.datos && jsonData.datos.id) {",
+                  "  pm.collectionVariables.set('turno_id_2', jsonData.datos.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_operador}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 1,\n  \"id_medico\": 3,\n  \"id_paciente\": 2,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"17:00\",\n  \"nota\": \"En representacion\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+          }
+        },
+        {
+          "name": "Turnos - Mis turnos (paciente, 200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/turnos/mios", "host": ["{{base_url}}"], "path": ["turnos", "mios"] }
+          }
+        },
+        {
+          "name": "Turnos - Programados del médico por fecha (200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
+            "url": {
+              "raw": "{{base_url}}/turnos/medico?fecha=2025-10-20",
+              "host": ["{{base_url}}"],
+              "path": ["turnos", "medico"],
+              "query": [{ "key": "fecha", "value": "2025-10-20" }]
+            }
+          }
+        },
+        {
+          "name": "Turnos - De la sede por fecha, operador (200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_operador}}" }],
+            "url": {
+              "raw": "{{base_url}}/turnos/sede?fecha=2025-10-20",
+              "host": ["{{base_url}}"],
+              "path": ["turnos", "sede"],
+              "query": [{ "key": "fecha", "value": "2025-10-20" }]
+            }
+          }
+        },
+        {
+          "name": "Turnos - Cancelar turno propio, genera notificación (200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/turnos/{{turno_id}}/cancelar", "host": ["{{base_url}}"], "path": ["turnos", "{{turno_id}}", "cancelar"] }
+          }
+        },
+        {
+          "name": "Turnos - Cancelar un turno ya cancelado (409 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/turnos/{{turno_id}}/cancelar", "host": ["{{base_url}}"], "path": ["turnos", "{{turno_id}}", "cancelar"] }
+          }
+        },
+        {
+          "name": "Turnos - Médico marca como atendido (200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
+            "url": { "raw": "{{base_url}}/turnos/{{turno_id_2}}/atender", "host": ["{{base_url}}"], "path": ["turnos", "{{turno_id_2}}", "atender"] }
+          }
+        },
+        {
+          "name": "Historial - Registrar historial del turno atendido (201 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_medico}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_turno\": {{turno_id_2}},\n  \"diagnostico\": \"Control general\",\n  \"tratamiento\": \"Ninguno\",\n  \"observaciones\": \"Paciente sano\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/historial", "host": ["{{base_url}}"], "path": ["historial"] }
+          }
+        },
+        {
+          "name": "Historial - Registrar historial duplicado para el mismo turno (409 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_medico}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_turno\": {{turno_id_2}},\n  \"diagnostico\": \"Duplicado\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/historial", "host": ["{{base_url}}"], "path": ["historial"] }
+          }
+        },
+        {
+          "name": "Historial - Paciente consulta su propio historial (200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/historial/{{paciente_id_test}}",
+              "host": ["{{base_url}}"],
+              "path": ["historial", "{{paciente_id_test}}"]
+            }
+          }
+        },
+        {
+          "name": "Historial - Médico consulta solo lo que él atendió (200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
+            "url": {
+              "raw": "{{base_url}}/historial/{{paciente_id_test}}",
+              "host": ["{{base_url}}"],
+              "path": ["historial", "{{paciente_id_test}}"]
+            }
+          }
+        },
+        {
+          "name": "Historial - Paciente intenta ver historial ajeno (403 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/historial/2", "host": ["{{base_url}}"], "path": ["historial", "2"] }
+          }
+        },
+        {
+          "name": "Notificaciones - Listar propias (200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.datos && jsonData.datos.length > 0) {",
+                  "  pm.collectionVariables.set('notificacion_id', jsonData.datos[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/notificaciones", "host": ["{{base_url}}"], "path": ["notificaciones"] }
+          }
+        },
+        {
+          "name": "Notificaciones - Marcar como leída (200 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/notificaciones/{{notificacion_id}}/leida",
+              "host": ["{{base_url}}"],
+              "path": ["notificaciones", "{{notificacion_id}}", "leida"]
+            }
+          }
+        },
+        {
+          "name": "Notificaciones - Marcar como leída una notificación ajena (403 esperado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
+            "url": {
+              "raw": "{{base_url}}/notificaciones/{{notificacion_id}}/leida",
+              "host": ["{{base_url}}"],
+              "path": ["notificaciones", "{{notificacion_id}}", "leida"]
+            }
+          }
+        },
+        {
+          "name": "Notificaciones - Sin token (401 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/notificaciones", "host": ["{{base_url}}"], "path": ["notificaciones"] }
           }
         }
       ]

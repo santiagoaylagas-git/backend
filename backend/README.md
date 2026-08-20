@@ -97,6 +97,29 @@ Notas:
 - Un médico que intenta gestionar la agenda de otro médico recibe `403`. Un `paciente` no tiene acceso a ningún endpoint de agenda.
 - Las bajas nunca devuelven `500` por una dependencia existente: siempre `409` con el mensaje correspondiente.
 
+## Endpoints (semana 3)
+
+Turnos, historial clínico y notificaciones, sobre la rama `entrega-backend-3`.
+
+| Método | Endpoint                     | Descripción                                                                 | Protegido                                    |
+|--------|-------------------------------|-------------------------------------------------------------------------------|------------------------------------------------|
+| POST   | `/turnos`                     | Alta de turno (`id_especialidad`, `id_sede`, `id_medico`, `fecha`, `hora`, `nota`; `id_paciente` si lo pide un operador) | Sí — rol `paciente` (propio) u `operador` (su sede) |
+| GET    | `/turnos/mios`                 | "Mis turnos" del paciente logueado, del más próximo al menos próximo          | Sí — rol `paciente`                             |
+| GET    | `/turnos/medico?fecha=`        | Turnos programados del médico logueado para una fecha                        | Sí — rol `medico`                               |
+| GET    | `/turnos/sede?fecha=`          | Turnos de la sede del operador logueado para una fecha                       | Sí — rol `operador`                             |
+| PUT    | `/turnos/:id/cancelar`         | Cancela un turno (`estado = 'cancelado'`); notifica al paciente y al médico   | Sí — rol `paciente` (propio), `operador`/`medico` (su sede) |
+| PUT    | `/turnos/:id/atender`          | Marca un turno como atendido (`estado = 'atendido'`); notifica al paciente    | Sí — rol `medico` (solo sus propios turnos)     |
+| POST   | `/historial`                   | Registra diagnóstico/tratamiento/observaciones de un turno atendido           | Sí — rol `medico` (solo turnos que atendió)     |
+| GET    | `/historial/:idPaciente`       | Historial clínico de un paciente                                              | Sí — `paciente` (el propio) o `medico` (solo lo que él atendió) |
+| GET    | `/notificaciones`              | Notificaciones propias, de más reciente a más antigua                        | Sí (cualquier rol autenticado)                  |
+| PUT    | `/notificaciones/:id/leida`    | Marca una notificación propia como leída                                      | Sí (cualquier rol autenticado, solo la propia)  |
+
+Notas y decisiones de diseño:
+- La disponibilidad del turno se valida contra la agenda del médico (rango `hora_entrada`–`hora_salida` de ese día) y contra otros turnos ya `confirmado` en el mismo horario; ambos casos devuelven un error controlado (`400`/`409`), nunca `500`.
+- La cobertura del turno se toma siempre de `usuario.id_cobertura` del paciente; no se puede pisar desde el body del alta.
+- "Atender turno" y "cargar historial clínico" quedaron como **endpoints separados** (la consigna lo deja a criterio del grupo); ambos registros quedan asociados por `id_turno`.
+- Las notificaciones no tienen endpoint de alta público: se generan internamente al confirmar, cancelar o atender un turno (`src/utils/notificaciones.js`).
+
 ## Formato de respuesta
 
 Todas las respuestas siguen la estructura uniforme definida en el enunciado general:
@@ -120,5 +143,6 @@ Colección en [`postman/clinica.postman_collection.json`](postman/clinica.postma
 
 - **Semana 1 — Setup y autenticación**: `health`, `coberturas`, `registro`, `login`, `perfil`, `panel-admin` (con los tres roles y casos 401/403).
 - **Semana 2 — Sedes / Especialidades / Coberturas / Agenda médica**: alta, listado, modificación y baja de cada entidad, con los casos de rol no autorizado (403) y de eliminación con dependencias (409).
+- **Semana 3 — Turnos, historial y notificaciones**: alta de turno con horario disponible, alta rechazada por horario ocupado (409) y por horario fuera de agenda (400), cancelación con notificación generada, atención de turno con su historial clínico asociado, consultas de historial con las restricciones de acceso, y listado/marcado de notificaciones.
 
-Se puede correr **toda la colección de punta a punta con "Run Collection"** sobre una base recién importada: los tokens (`token`, `token_admin`, `token_medico`, `token_operador`) y los IDs creados en cada alta (`sede_id`, `especialidad_id`, `cobertura_id`, `agenda_id`) se guardan solos en variables de colección a partir de las respuestas, sin pasos manuales.
+Se puede correr **toda la colección de punta a punta con "Run Collection"** sobre una base recién importada: los tokens (`token`, `token_admin`, `token_medico`, `token_operador`) y los IDs creados en cada alta (`sede_id`, `especialidad_id`, `cobertura_id`, `agenda_id`, `turno_id`, `turno_id_2`, `notificacion_id`, `paciente_id_test`) se guardan solos en variables de colección a partir de las respuestas, sin pasos manuales. Verificado corriendo la colección completa (60/60 requests) contra una base recién importada.
