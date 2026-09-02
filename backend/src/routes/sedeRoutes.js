@@ -1,10 +1,11 @@
 const { Router } = require('express');
 const { crear, listar, modificar, eliminar } = require('../controllers/sedeController');
 const { verificarToken, verificarRol } = require('../middlewares/auth');
+const { auditar } = require('../middlewares/auditoria');
 
 const router = Router();
 
-router.use(verificarToken, verificarRol('admin'));
+router.use(verificarToken, verificarRol('admin'), auditar('sede'));
 
 router.post('/', crear);
 router.get('/', listar);

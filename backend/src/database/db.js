@@ -6,6 +6,9 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  // Devuelve DATE/DATETIME como texto (AAAA-MM-DD) en lugar de convertirlos a UTC,
+  // que desplazaba el dia segun la zona horaria del cliente.
+  dateStrings: true,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

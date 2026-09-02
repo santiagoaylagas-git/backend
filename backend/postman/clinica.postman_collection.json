@@ -1,23 +1,62 @@
 {
   "info": {
-    "name": "Clinica - Backend",
-    "description": "Semana 1: health, autenticación, coberturas. Semana 2: CRUD de sedes, especialidades, coberturas y agenda médica. Semana 3: turnos, historial clínico y notificaciones. Correr la colección completa de punta a punta con Run Collection.",
+    "name": "Clinica - Backend (Sistema de Gestion de Turnos Medicos)",
+    "description": "Documentación completa de la API del trabajo práctico integrador de Programación 2, cubriendo las cuatro semanas de backend.\n\nCada request incluye, en su pestaña de documentación, el rol que puede acceder, los parámetros de ruta y de consulta, el body esperado y todas las respuestas posibles de éxito y error.\n\n## Formato de respuesta uniforme\n\nTodos los endpoints, tanto en éxito como en error, responden con la misma estructura de tres elementos:\n\n```json\n{ \"codigo\": 200, \"estado\": \"ok\", \"datos\": { } }\n```\n\n- **codigo** — código numérico HTTP del resultado.\n- **estado** — `\"ok\"` si la operación fue satisfactoria, o el mensaje descriptivo del error.\n- **datos** — información devuelta, o `null` cuando la operación no retorna datos.\n\n## Autenticación\n\nLos endpoints protegidos esperan el JWT obtenido en `POST /auth/login` en la cabecera `Authorization: Bearer <token>`. El token incluye `id`, `rol` e `id_sede` del usuario.\n\nUna petición sin token válido responde `401`; con un rol no permitido, `403`.\n\n## Roles\n\n`paciente`, `medico`, `operador` y `admin`. Los cuatro usuarios de prueba que trae el script de base usan la contraseña `test1234`:\n\n| DNI | Rol |\n| --- | --- |\n| 18222333 | admin |\n| 20111222 | medico |\n| 15200548 | operador |\n| 36000960 | paciente |\n\n## Cómo correrla\n\nLevantar el backend con `npm run dev` y ejecutar la colección completa con **Run Collection**, en el orden de las carpetas, sobre una base recién importada.\n\nLos tokens y los ids creados en cada alta se guardan solos en variables de colección a partir de las respuestas, así que no hace falta ningún paso manual.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:3000" },
-    { "key": "token", "value": "" },
-    { "key": "token_admin", "value": "" },
-    { "key": "token_medico", "value": "" },
-    { "key": "token_operador", "value": "" },
-    { "key": "sede_id", "value": "" },
-    { "key": "especialidad_id", "value": "" },
-    { "key": "cobertura_id", "value": "" },
-    { "key": "agenda_id", "value": "" },
-    { "key": "paciente_id_test", "value": "" },
-    { "key": "turno_id", "value": "" },
-    { "key": "turno_id_2", "value": "" },
-    { "key": "notificacion_id", "value": "" }
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "token_admin",
+      "value": ""
+    },
+    {
+      "key": "token_medico",
+      "value": ""
+    },
+    {
+      "key": "token_operador",
+      "value": ""
+    },
+    {
+      "key": "sede_id",
+      "value": ""
+    },
+    {
+      "key": "especialidad_id",
+      "value": ""
+    },
+    {
+      "key": "cobertura_id",
+      "value": ""
+    },
+    {
+      "key": "agenda_id",
+      "value": ""
+    },
+    {
+      "key": "paciente_id_test",
+      "value": ""
+    },
+    {
+      "key": "turno_id",
+      "value": ""
+    },
+    {
+      "key": "turno_id_2",
+      "value": ""
+    },
+    {
+      "key": "notificacion_id",
+      "value": ""
+    }
   ],
   "item": [
     {
@@ -28,7 +67,16 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "**Rol:** público (no requiere token).\n\nEjecuta una consulta simple contra MySQL para verificar que la conexión está activa.\n\n**Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { \"db\": \"conectada\" }`.\n- `500` — no se pudo conectar a la base de datos."
           }
         },
         {
@@ -36,7 +84,16 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{base_url}}/coberturas", "host": ["{{base_url}}"], "path": ["coberturas"] }
+            "url": {
+              "raw": "{{base_url}}/coberturas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "coberturas"
+              ]
+            },
+            "description": "**Rol:** público (no requiere token).\n\nServicio de solo lectura que lista las coberturas disponibles. Se reutiliza desde el formulario de registro de pacientes.\n\n**Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, nombre }`.\n- `500` — error interno."
           }
         },
         {
@@ -58,12 +115,27 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombre\": \"Test\",\n  \"apellido\": \"Postman\",\n  \"dni\": \"30111222\",\n  \"email\": \"test.postman@clinica.com\",\n  \"password\": \"secreto123\",\n  \"fecha_nacimiento\": \"1999-01-01\",\n  \"id_cobertura\": 1\n}"
             },
-            "url": { "raw": "{{base_url}}/auth/registro", "host": ["{{base_url}}"], "path": ["auth", "registro"] }
+            "url": {
+              "raw": "{{base_url}}/auth/registro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            },
+            "description": "**Rol:** público (no requiere token).\n\nRegistra un paciente. El rol se asigna siempre como `paciente` y no puede elegirse desde el body. La contraseña se guarda hasheada con bcrypt. El alta queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido)\n- `apellido` (string, requerido)\n- `dni` (string, requerido, máx. 8, único)\n- `email` (string, requerido, único)\n- `password` (string, requerido)\n- `fecha_nacimiento` (string `AAAA-MM-DD`, requerido)\n- `id_cobertura` (entero, requerido, debe existir — ver `GET /coberturas`)\n- `telefono` (string, opcional, máx. 10)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — paciente creado; `datos` con id, nombre, apellido, dni, email, rol y cobertura.\n- `400` — faltan datos obligatorios, o la cobertura indicada no existe.\n- `409` — ya existe un usuario con ese DNI o email.\n- `500` — error interno."
           }
         },
         {
@@ -85,20 +157,50 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"dni\": \"30111222\",\n  \"password\": \"secreto123\"\n}"
             },
-            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Rol:** público (no requiere token).\n\nValida el DNI y la contraseña contra el hash almacenado y devuelve el JWT usado por el resto de la API.\n\n**Body (JSON)**\n\n- `dni` (string, requerido)\n- `password` (string, requerido)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { \"token\": \"...\", \"usuario\": { \"id\", \"rol\", \"id_sede\" } }`. El token se firma con `JWT_SECRET` y vence según `JWT_EXPIRES_IN`.\n- `400` — faltan `dni` o `password`.\n- `401` — credenciales inválidas.\n- `500` — error interno."
           }
         },
         {
           "name": "Auth - Perfil (protegido)",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{base_url}}/auth/perfil", "host": ["{{base_url}}"], "path": ["auth", "perfil"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/perfil",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "perfil"
+              ]
+            },
+            "description": "**Rol:** cualquier rol autenticado.\n\nDevuelve los datos del usuario logueado a partir del `id` contenido en el token. Nunca incluye la contraseña.\n\n**Cabeceras:** `Authorization: Bearer <token>`. **Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — datos del usuario.\n- `401` — token ausente, inválido o vencido.\n- `404` — el usuario del token ya no existe.\n- `500` — error interno."
           }
         },
         {
@@ -106,7 +208,17 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{base_url}}/auth/perfil", "host": ["{{base_url}}"], "path": ["auth", "perfil"] }
+            "url": {
+              "raw": "{{base_url}}/auth/perfil",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "perfil"
+              ]
+            },
+            "description": "**Rol:** cualquier rol autenticado.\n\nDevuelve los datos del usuario logueado a partir del `id` contenido en el token. Nunca incluye la contraseña.\n\n**Cabeceras:** `Authorization: Bearer <token>`. **Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — datos del usuario.\n- `401` — token ausente, inválido o vencido.\n- `404` — el usuario del token ya no existe.\n- `500` — error interno."
           }
         },
         {
@@ -128,12 +240,27 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"dni\": \"18222333\",\n  \"password\": \"test1234\"\n}"
             },
-            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Rol:** público (no requiere token).\n\nValida el DNI y la contraseña contra el hash almacenado y devuelve el JWT usado por el resto de la API.\n\n**Body (JSON)**\n\n- `dni` (string, requerido)\n- `password` (string, requerido)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { \"token\": \"...\", \"usuario\": { \"id\", \"rol\", \"id_sede\" } }`. El token se firma con `JWT_SECRET` y vence según `JWT_EXPIRES_IN`.\n- `400` — faltan `dni` o `password`.\n- `401` — credenciales inválidas.\n- `500` — error interno."
           }
         },
         {
@@ -155,12 +282,27 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"dni\": \"20111222\",\n  \"password\": \"test1234\"\n}"
             },
-            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Rol:** público (no requiere token).\n\nValida el DNI y la contraseña contra el hash almacenado y devuelve el JWT usado por el resto de la API.\n\n**Body (JSON)**\n\n- `dni` (string, requerido)\n- `password` (string, requerido)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { \"token\": \"...\", \"usuario\": { \"id\", \"rol\", \"id_sede\" } }`. El token se firma con `JWT_SECRET` y vence según `JWT_EXPIRES_IN`.\n- `400` — faltan `dni` o `password`.\n- `401` — credenciales inválidas.\n- `500` — error interno."
           }
         },
         {
@@ -182,12 +324,27 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"dni\": \"15200548\",\n  \"password\": \"test1234\"\n}"
             },
-            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "**Rol:** público (no requiere token).\n\nValida el DNI y la contraseña contra el hash almacenado y devuelve el JWT usado por el resto de la API.\n\n**Body (JSON)**\n\n- `dni` (string, requerido)\n- `password` (string, requerido)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { \"token\": \"...\", \"usuario\": { \"id\", \"rol\", \"id_sede\" } }`. El token se firma con `JWT_SECRET` y vence según `JWT_EXPIRES_IN`.\n- `400` — faltan `dni` o `password`.\n- `401` — credenciales inválidas.\n- `500` — error interno."
           }
         },
         {
@@ -205,8 +362,23 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
-            "url": { "raw": "{{base_url}}/auth/panel-admin", "host": ["{{base_url}}"], "path": ["auth", "panel-admin"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/panel-admin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "panel-admin"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nEndpoint de prueba que demuestra el middleware `verificarRol`: cualquier otro rol recibe 403.\n\n**Cabeceras:** `Authorization: Bearer <token>`. **Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — acceso concedido.\n- `401` — token ausente, inválido o vencido.\n- `403` — el rol del usuario no es `admin`."
           }
         },
         {
@@ -224,8 +396,23 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{base_url}}/auth/panel-admin", "host": ["{{base_url}}"], "path": ["auth", "panel-admin"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/panel-admin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "panel-admin"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nEndpoint de prueba que demuestra el middleware `verificarRol`: cualquier otro rol recibe 403.\n\n**Cabeceras:** `Authorization: Bearer <token>`. **Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — acceso concedido.\n- `401` — token ausente, inválido o vencido.\n- `403` — el rol del usuario no es `admin`."
           }
         },
         {
@@ -233,10 +420,21 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{base_url}}/auth/panel-admin", "host": ["{{base_url}}"], "path": ["auth", "panel-admin"] }
+            "url": {
+              "raw": "{{base_url}}/auth/panel-admin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "panel-admin"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nEndpoint de prueba que demuestra el middleware `verificarRol`: cualquier otro rol recibe 403.\n\n**Cabeceras:** `Authorization: Bearer <token>`. **Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — acceso concedido.\n- `401` — token ausente, inválido o vencido.\n- `403` — el rol del usuario no es `admin`."
           }
         }
-      ]
+      ],
+      "description": "Setup del proyecto, conexión a la base y autenticación con JWT. Incluye el registro de pacientes, el login de los cuatro roles y los endpoints protegidos por `verificarToken` (401) y `verificarRol` (403).\n\nLos logins de esta carpeta guardan los tokens en las variables de colección `token`, `token_admin`, `token_medico` y `token_operador`, que usan el resto de las carpetas. Correrla primero."
     },
     {
       "name": "Semana 2 - Sedes (solo admin)",
@@ -261,14 +459,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombre\": \"Sede Postman\",\n  \"direccion\": \"Calle Falsa 123\",\n  \"telefono\": \"3424999999\"\n}"
             },
-            "url": { "raw": "{{base_url}}/sedes", "host": ["{{base_url}}"], "path": ["sedes"] }
+            "url": {
+              "raw": "{{base_url}}/sedes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sedes"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nDa de alta una sede. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 50)\n- `direccion` (string, requerido, máx. 100)\n- `telefono` (string, requerido, máx. 15)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — sede creada; `datos: { id, nombre, direccion, telefono }`.\n- `400` — faltan datos obligatorios.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -278,21 +491,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombre\": \"Sede No Autorizada\",\n  \"direccion\": \"X\",\n  \"telefono\": \"123\"\n}"
             },
-            "url": { "raw": "{{base_url}}/sedes", "host": ["{{base_url}}"], "path": ["sedes"] }
+            "url": {
+              "raw": "{{base_url}}/sedes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sedes"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nDa de alta una sede. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 50)\n- `direccion` (string, requerido, máx. 100)\n- `telefono` (string, requerido, máx. 15)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — sede creada; `datos: { id, nombre, direccion, telefono }`.\n- `400` — faltan datos obligatorios.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -300,7 +530,16 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{base_url}}/sedes", "host": ["{{base_url}}"], "path": ["sedes"] }
+            "url": {
+              "raw": "{{base_url}}/sedes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sedes"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nLista todas las sedes, ordenadas por nombre.\n\n**Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, nombre, direccion, telefono }`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -310,14 +549,30 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
-            "url": { "raw": "{{base_url}}/sedes", "host": ["{{base_url}}"], "path": ["sedes"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sedes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sedes"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nLista todas las sedes, ordenadas por nombre.\n\n**Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, nombre, direccion, telefono }`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -327,21 +582,39 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombre\": \"Sede Postman Editada\",\n  \"direccion\": \"Calle Falsa 456\",\n  \"telefono\": \"3424888888\"\n}"
             },
-            "url": { "raw": "{{base_url}}/sedes/{{sede_id}}", "host": ["{{base_url}}"], "path": ["sedes", "{{sede_id}}"] }
+            "url": {
+              "raw": "{{base_url}}/sedes/{{sede_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sedes",
+                "{{sede_id}}"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nModifica una sede existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido)\n- `direccion` (string, requerido)\n- `telefono` (string, requerido)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — sede modificada.\n- `400` — faltan datos obligatorios.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la sede no existe.\n- `500` — error interno."
           }
         },
         {
@@ -351,14 +624,31 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+                "exec": [
+                  "pm.test('status 409', function () { pm.response.to.have.status(409); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
-            "url": { "raw": "{{base_url}}/sedes/1", "host": ["{{base_url}}"], "path": ["sedes", "1"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sedes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sedes",
+                "1"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nElimina una sede. Antes valida que no tenga médicos, operadores ni agenda asociada: si los tiene devuelve un error controlado `409`, nunca un 500. La baja queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — sede eliminada; `datos: { id }`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la sede no existe.\n- `409` — tiene médicos, operadores o agenda asociada.\n- `500` — error interno."
           }
         },
         {
@@ -368,17 +658,35 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
-            "url": { "raw": "{{base_url}}/sedes/{{sede_id}}", "host": ["{{base_url}}"], "path": ["sedes", "{{sede_id}}"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sedes/{{sede_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sedes",
+                "{{sede_id}}"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nElimina una sede. Antes valida que no tenga médicos, operadores ni agenda asociada: si los tiene devuelve un error controlado `409`, nunca un 500. La baja queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — sede eliminada; `datos: { id }`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la sede no existe.\n- `409` — tiene médicos, operadores o agenda asociada.\n- `500` — error interno."
           }
         }
-      ]
+      ],
+      "description": "ABM de sedes, restringido al rol `admin`. Incluye los casos de rol no autorizado (403), falta de token (401) y baja con dependencias asociadas (409)."
     },
     {
       "name": "Semana 2 - Especialidades (solo admin)",
@@ -403,11 +711,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"descripcion\": \"Cardiologia\"\n}" },
-            "url": { "raw": "{{base_url}}/especialidades", "host": ["{{base_url}}"], "path": ["especialidades"] }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Cardiologia\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/especialidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "especialidades"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nDa de alta una especialidad. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — especialidad creada; `datos: { id, descripcion }`.\n- `400` — falta `descripcion`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -417,18 +743,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_operador}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_operador}}"
+              }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"descripcion\": \"No autorizada\"\n}" },
-            "url": { "raw": "{{base_url}}/especialidades", "host": ["{{base_url}}"], "path": ["especialidades"] }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"No autorizada\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/especialidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "especialidades"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nDa de alta una especialidad. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — especialidad creada; `datos: { id, descripcion }`.\n- `400` — falta `descripcion`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -438,14 +784,30 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
-            "url": { "raw": "{{base_url}}/especialidades", "host": ["{{base_url}}"], "path": ["especialidades"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/especialidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "especialidades"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nLista todas las especialidades, ordenadas por descripción.\n\n**Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, descripcion }`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -455,22 +817,39 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"descripcion\": \"Cardiologia Editada\"\n}" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Cardiologia Editada\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/especialidades/{{especialidad_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["especialidades", "{{especialidad_id}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "especialidades",
+                "{{especialidad_id}}"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nModifica una especialidad existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — especialidad modificada.\n- `400` — falta `descripcion`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la especialidad no existe.\n- `500` — error interno."
           }
         },
         {
@@ -480,14 +859,31 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+                "exec": [
+                  "pm.test('status 409', function () { pm.response.to.have.status(409); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
-            "url": { "raw": "{{base_url}}/especialidades/1", "host": ["{{base_url}}"], "path": ["especialidades", "1"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/especialidades/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "especialidades",
+                "1"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nElimina una especialidad. Antes valida que ningún médico la tenga asociada en `medico_especialidad` y que no tenga agenda asociada: si las tiene devuelve un error controlado `409`, nunca un 500. La baja queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — especialidad eliminada; `datos: { id }`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la especialidad no existe.\n- `409` — tiene médicos o agenda asociada.\n- `500` — error interno."
           }
         },
         {
@@ -497,21 +893,35 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/especialidades/{{especialidad_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["especialidades", "{{especialidad_id}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "especialidades",
+                "{{especialidad_id}}"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nElimina una especialidad. Antes valida que ningún médico la tenga asociada en `medico_especialidad` y que no tenga agenda asociada: si las tiene devuelve un error controlado `409`, nunca un 500. La baja queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — especialidad eliminada; `datos: { id }`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la especialidad no existe.\n- `409` — tiene médicos o agenda asociada.\n- `500` — error interno."
           }
         }
-      ]
+      ],
+      "description": "ABM de especialidades, restringido al rol `admin`. Incluye los casos de rol no autorizado (403) y baja con médicos o agenda asociada (409)."
     },
     {
       "name": "Semana 2 - Coberturas (alta/baja solo admin)",
@@ -536,20 +946,55 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Particular\"\n}" },
-            "url": { "raw": "{{base_url}}/coberturas", "host": ["{{base_url}}"], "path": ["coberturas"] }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Particular\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/coberturas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "coberturas"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nDa de alta una cobertura. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — cobertura creada; `datos: { id, nombre }`.\n- `400` — falta `nombre`.\n- `401` — token ausente o inválido.\n- `403` — el rol no es `admin`.\n- `500` — error interno."
           }
         },
         {
           "name": "Coberturas - Crear sin token (401 esperado)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Sin token\"\n}" },
-            "url": { "raw": "{{base_url}}/coberturas", "host": ["{{base_url}}"], "path": ["coberturas"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sin token\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/coberturas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "coberturas"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nDa de alta una cobertura. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — cobertura creada; `datos: { id, nombre }`.\n- `400` — falta `nombre`.\n- `401` — token ausente o inválido.\n- `403` — el rol no es `admin`.\n- `500` — error interno."
           }
         },
         {
@@ -559,22 +1004,39 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Particular Editada\"\n}" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Particular Editada\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/coberturas/{{cobertura_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["coberturas", "{{cobertura_id}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "coberturas",
+                "{{cobertura_id}}"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nModifica una cobertura existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero) — identificador de la cobertura.\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — cobertura modificada.\n- `400` — falta `nombre`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la cobertura no existe.\n- `500` — error interno."
           }
         },
         {
@@ -584,14 +1046,31 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+                "exec": [
+                  "pm.test('status 409', function () { pm.response.to.have.status(409); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
-            "url": { "raw": "{{base_url}}/coberturas/1", "host": ["{{base_url}}"], "path": ["coberturas", "1"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/coberturas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "coberturas",
+                "1"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nElimina una cobertura. Antes valida que ningún usuario ni turno la tenga asociada: si los tiene devuelve un error controlado `409`, nunca un 500. La baja queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — cobertura eliminada; `datos: { id }`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la cobertura no existe.\n- `409` — tiene usuarios o turnos asociados.\n- `500` — error interno."
           }
         },
         {
@@ -601,21 +1080,35 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/coberturas/{{cobertura_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["coberturas", "{{cobertura_id}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "coberturas",
+                "{{cobertura_id}}"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nElimina una cobertura. Antes valida que ningún usuario ni turno la tenga asociada: si los tiene devuelve un error controlado `409`, nunca un 500. La baja queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — cobertura eliminada; `datos: { id }`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la cobertura no existe.\n- `409` — tiene usuarios o turnos asociados.\n- `500` — error interno."
           }
         }
-      ]
+      ],
+      "description": "ABM de coberturas, restringido al rol `admin`. El listado (`GET /coberturas`) es público y se prueba en la carpeta de la semana 1, ya que se reutiliza desde el registro de pacientes."
     },
     {
       "name": "Semana 2 - Agenda médica",
@@ -640,14 +1133,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_medico}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"hora_entrada\": \"09:00\",\n  \"hora_salida\": \"12:00\",\n  \"fecha\": \"2026-09-01\",\n  \"id_medico\": 3,\n  \"id_especialidad\": 1,\n  \"id_sede\": 1\n}"
             },
-            "url": { "raw": "{{base_url}}/agenda", "host": ["{{base_url}}"], "path": ["agenda"] }
+            "url": {
+              "raw": "{{base_url}}/agenda",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda"
+              ]
+            },
+            "description": "**Rol:** `medico` (solo para sí mismo) u `operador` (para cualquier médico y sede).\n\nCarga un rango horario de agenda. Se admite más de un rango para la misma fecha y médico.\n\n**Body (JSON)**\n\n- `hora_entrada` (string `HH:MM`, requerido)\n- `hora_salida` (string `HH:MM`, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `id_medico` (entero, requerido, debe corresponder a un usuario con rol `medico`)\n- `id_especialidad` (entero, requerido, debe existir)\n- `id_sede` (entero, requerido, debe existir)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — agenda creada.\n- `400` — faltan datos, o el médico, la especialidad o la sede no existen.\n- `401` — sin token.\n- `403` — rol no permitido, o un médico intenta cargar agenda para otro médico.\n- `500` — error interno."
           }
         },
         {
@@ -657,21 +1165,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_medico}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"hora_entrada\": \"09:00\",\n  \"hora_salida\": \"12:00\",\n  \"fecha\": \"2026-09-01\",\n  \"id_medico\": 99,\n  \"id_especialidad\": 1,\n  \"id_sede\": 1\n}"
             },
-            "url": { "raw": "{{base_url}}/agenda", "host": ["{{base_url}}"], "path": ["agenda"] }
+            "url": {
+              "raw": "{{base_url}}/agenda",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda"
+              ]
+            },
+            "description": "**Rol:** `medico` (solo para sí mismo) u `operador` (para cualquier médico y sede).\n\nCarga un rango horario de agenda. Se admite más de un rango para la misma fecha y médico.\n\n**Body (JSON)**\n\n- `hora_entrada` (string `HH:MM`, requerido)\n- `hora_salida` (string `HH:MM`, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `id_medico` (entero, requerido, debe corresponder a un usuario con rol `medico`)\n- `id_especialidad` (entero, requerido, debe existir)\n- `id_sede` (entero, requerido, debe existir)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — agenda creada.\n- `400` — faltan datos, o el médico, la especialidad o la sede no existen.\n- `401` — sin token.\n- `403` — rol no permitido, o un médico intenta cargar agenda para otro médico.\n- `500` — error interno."
           }
         },
         {
@@ -681,21 +1206,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });"]
+                "exec": [
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_operador}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_operador}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"hora_entrada\": \"14:00\",\n  \"hora_salida\": \"18:00\",\n  \"fecha\": \"2026-09-01\",\n  \"id_medico\": 3,\n  \"id_especialidad\": 1,\n  \"id_sede\": 1\n}"
             },
-            "url": { "raw": "{{base_url}}/agenda", "host": ["{{base_url}}"], "path": ["agenda"] }
+            "url": {
+              "raw": "{{base_url}}/agenda",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda"
+              ]
+            },
+            "description": "**Rol:** `medico` (solo para sí mismo) u `operador` (para cualquier médico y sede).\n\nCarga un rango horario de agenda. Se admite más de un rango para la misma fecha y médico.\n\n**Body (JSON)**\n\n- `hora_entrada` (string `HH:MM`, requerido)\n- `hora_salida` (string `HH:MM`, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `id_medico` (entero, requerido, debe corresponder a un usuario con rol `medico`)\n- `id_especialidad` (entero, requerido, debe existir)\n- `id_sede` (entero, requerido, debe existir)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — agenda creada.\n- `400` — faltan datos, o el médico, la especialidad o la sede no existen.\n- `401` — sin token.\n- `403` — rol no permitido, o un médico intenta cargar agenda para otro médico.\n- `500` — error interno."
           }
         },
         {
@@ -705,21 +1247,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"hora_entrada\": \"09:00\",\n  \"hora_salida\": \"12:00\",\n  \"fecha\": \"2026-09-01\",\n  \"id_medico\": 3,\n  \"id_especialidad\": 1,\n  \"id_sede\": 1\n}"
             },
-            "url": { "raw": "{{base_url}}/agenda", "host": ["{{base_url}}"], "path": ["agenda"] }
+            "url": {
+              "raw": "{{base_url}}/agenda",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda"
+              ]
+            },
+            "description": "**Rol:** `medico` (solo para sí mismo) u `operador` (para cualquier médico y sede).\n\nCarga un rango horario de agenda. Se admite más de un rango para la misma fecha y médico.\n\n**Body (JSON)**\n\n- `hora_entrada` (string `HH:MM`, requerido)\n- `hora_salida` (string `HH:MM`, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `id_medico` (entero, requerido, debe corresponder a un usuario con rol `medico`)\n- `id_especialidad` (entero, requerido, debe existir)\n- `id_sede` (entero, requerido, debe existir)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — agenda creada.\n- `400` — faltan datos, o el médico, la especialidad o la sede no existen.\n- `401` — sin token.\n- `403` — rol no permitido, o un médico intenta cargar agenda para otro médico.\n- `500` — error interno."
           }
         },
         {
@@ -727,7 +1286,16 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{base_url}}/agenda", "host": ["{{base_url}}"], "path": ["agenda"] }
+            "url": {
+              "raw": "{{base_url}}/agenda",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda"
+              ]
+            },
+            "description": "**Rol:** `medico` u `operador`. El rol `paciente` no tiene acceso.\n\nLista los rangos horarios de la agenda médica. Un médico ve únicamente la propia: el filtro `id_medico` se fuerza a su id, ignorando lo que envíe. Un operador puede consultar la de cualquier médico y sede.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_medico` (entero) — se ignora cuando el rol es `medico`.\n- `id_sede` (entero)\n- `fecha` (string `AAAA-MM-DD`)\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, hora_entrada, hora_salida, fecha, id_medico, id_especialidad, id_sede }`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -737,14 +1305,30 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
-            "url": { "raw": "{{base_url}}/agenda", "host": ["{{base_url}}"], "path": ["agenda"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/agenda",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda"
+              ]
+            },
+            "description": "**Rol:** `medico` u `operador`. El rol `paciente` no tiene acceso.\n\nLista los rangos horarios de la agenda médica. Un médico ve únicamente la propia: el filtro `id_medico` se fuerza a su id, ignorando lo que envíe. Un operador puede consultar la de cualquier médico y sede.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_medico` (entero) — se ignora cuando el rol es `medico`.\n- `id_sede` (entero)\n- `fecha` (string `AAAA-MM-DD`)\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, hora_entrada, hora_salida, fecha, id_medico, id_especialidad, id_sede }`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -754,19 +1338,36 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_operador}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_operador}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/agenda?id_sede=1",
-              "host": ["{{base_url}}"],
-              "path": ["agenda"],
-              "query": [{ "key": "id_sede", "value": "1" }]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda"
+              ],
+              "query": [
+                {
+                  "key": "id_sede",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "**Rol:** `medico` u `operador`. El rol `paciente` no tiene acceso.\n\nLista los rangos horarios de la agenda médica. Un médico ve únicamente la propia: el filtro `id_medico` se fuerza a su id, ignorando lo que envíe. Un operador puede consultar la de cualquier médico y sede.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_medico` (entero) — se ignora cuando el rol es `medico`.\n- `id_sede` (entero)\n- `fecha` (string `AAAA-MM-DD`)\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, hora_entrada, hora_salida, fecha, id_medico, id_especialidad, id_sede }`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -776,21 +1377,39 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_medico}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"hora_entrada\": \"10:00\",\n  \"hora_salida\": \"13:00\",\n  \"fecha\": \"2026-09-01\",\n  \"id_especialidad\": 1,\n  \"id_sede\": 1\n}"
             },
-            "url": { "raw": "{{base_url}}/agenda/{{agenda_id}}", "host": ["{{base_url}}"], "path": ["agenda", "{{agenda_id}}"] }
+            "url": {
+              "raw": "{{base_url}}/agenda/{{agenda_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda",
+                "{{agenda_id}}"
+              ]
+            },
+            "description": "**Rol:** `medico` (solo la propia) u `operador`.\n\nModifica un rango horario de agenda. El médico titular del registro no se cambia desde este endpoint.\n\n**Parámetros de ruta:** `id` (entero) — identificador del registro de agenda.\n\n**Body (JSON)**\n\n- `hora_entrada` (string `HH:MM`, requerido)\n- `hora_salida` (string `HH:MM`, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `id_especialidad` (entero, requerido)\n- `id_sede` (entero, requerido)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — agenda modificada.\n- `400` — faltan datos, o la especialidad o la sede no existen.\n- `401` — sin token.\n- `403` — rol no permitido, o un médico intenta modificar agenda ajena.\n- `404` — el registro no existe.\n- `500` — error interno."
           }
         },
         {
@@ -800,14 +1419,31 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+                "exec": [
+                  "pm.test('status 409', function () { pm.response.to.have.status(409); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_operador}}" }],
-            "url": { "raw": "{{base_url}}/agenda/2", "host": ["{{base_url}}"], "path": ["agenda", "2"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_operador}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/agenda/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda",
+                "2"
+              ]
+            },
+            "description": "**Rol:** `medico` (solo la propia) u `operador`.\n\nElimina un rango horario de agenda. Si tiene turnos de pacientes asociados devuelve un error controlado `409`, nunca un 500.\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — agenda eliminada; `datos: { id }`.\n- `401` — sin token.\n- `403` — rol no permitido, o un médico intenta eliminar agenda ajena.\n- `404` — el registro no existe.\n- `409` — tiene turnos de pacientes asociados.\n- `500` — error interno."
           }
         },
         {
@@ -817,17 +1453,35 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
-            "url": { "raw": "{{base_url}}/agenda/{{agenda_id}}", "host": ["{{base_url}}"], "path": ["agenda", "{{agenda_id}}"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/agenda/{{agenda_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "agenda",
+                "{{agenda_id}}"
+              ]
+            },
+            "description": "**Rol:** `medico` (solo la propia) u `operador`.\n\nElimina un rango horario de agenda. Si tiene turnos de pacientes asociados devuelve un error controlado `409`, nunca un 500.\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — agenda eliminada; `datos: { id }`.\n- `401` — sin token.\n- `403` — rol no permitido, o un médico intenta eliminar agenda ajena.\n- `404` — el registro no existe.\n- `409` — tiene turnos de pacientes asociados.\n- `500` — error interno."
           }
         }
-      ]
+      ],
+      "description": "Gestión de la agenda médica. El rol `medico` solo puede operar sobre la propia; el rol `operador` sobre la de cualquier médico y sede; el rol `paciente` no tiene acceso."
     },
     {
       "name": "Semana 3 - Turnos, historial y notificaciones",
@@ -852,14 +1506,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 1,\n  \"id_medico\": 3,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"16:00\",\n  \"nota\": \"Consulta de rutina\"\n}"
             },
-            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+            "url": {
+              "raw": "{{base_url}}/turnos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos"
+              ]
+            },
+            "description": "**Rol:** `paciente` (para sí mismo) u `operador` (en representación de un paciente, solo en su propia sede).\n\nSolicita un turno. Validaciones aplicadas:\n\n- La hora debe caer dentro de un rango de la agenda del médico para esa fecha, especialidad y sede.\n- No debe existir otro turno `confirmado` en el mismo horario.\n- La cobertura se toma siempre de la registrada por el paciente y no puede pisarse desde el body.\n- El turno se crea con `estado = \"confirmado\"` y genera una notificación para el paciente.\n\n**Body (JSON)**\n\n- `id_especialidad` (entero, requerido)\n- `id_sede` (entero, requerido)\n- `id_medico` (entero, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `hora` (string `HH:MM`, requerido)\n- `nota` (string, requerido, máx. 40)\n- `id_paciente` (entero) — solo lo envía el operador. Si lo solicita el paciente se ignora y se usa el id del token.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — turno confirmado.\n- `400` — faltan datos, el paciente no es válido, o el horario no está disponible en la agenda del médico.\n- `401` — sin token.\n- `403` — rol no permitido, o el operador intenta solicitar el turno en una sede que no es la suya.\n- `409` — ya existe un turno confirmado en ese horario.\n- `500` — error interno."
           }
         },
         {
@@ -869,21 +1538,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+                "exec": [
+                  "pm.test('status 409', function () { pm.response.to.have.status(409); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 1,\n  \"id_medico\": 3,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"16:00\",\n  \"nota\": \"Otra consulta\"\n}"
             },
-            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+            "url": {
+              "raw": "{{base_url}}/turnos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos"
+              ]
+            },
+            "description": "**Rol:** `paciente` (para sí mismo) u `operador` (en representación de un paciente, solo en su propia sede).\n\nSolicita un turno. Validaciones aplicadas:\n\n- La hora debe caer dentro de un rango de la agenda del médico para esa fecha, especialidad y sede.\n- No debe existir otro turno `confirmado` en el mismo horario.\n- La cobertura se toma siempre de la registrada por el paciente y no puede pisarse desde el body.\n- El turno se crea con `estado = \"confirmado\"` y genera una notificación para el paciente.\n\n**Body (JSON)**\n\n- `id_especialidad` (entero, requerido)\n- `id_sede` (entero, requerido)\n- `id_medico` (entero, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `hora` (string `HH:MM`, requerido)\n- `nota` (string, requerido, máx. 40)\n- `id_paciente` (entero) — solo lo envía el operador. Si lo solicita el paciente se ignora y se usa el id del token.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — turno confirmado.\n- `400` — faltan datos, el paciente no es válido, o el horario no está disponible en la agenda del médico.\n- `401` — sin token.\n- `403` — rol no permitido, o el operador intenta solicitar el turno en una sede que no es la suya.\n- `409` — ya existe un turno confirmado en ese horario.\n- `500` — error interno."
           }
         },
         {
@@ -893,21 +1579,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 400', function () { pm.response.to.have.status(400); });"]
+                "exec": [
+                  "pm.test('status 400', function () { pm.response.to.have.status(400); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 1,\n  \"id_medico\": 3,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"21:00\",\n  \"nota\": \"Fuera de horario\"\n}"
             },
-            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+            "url": {
+              "raw": "{{base_url}}/turnos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos"
+              ]
+            },
+            "description": "**Rol:** `paciente` (para sí mismo) u `operador` (en representación de un paciente, solo en su propia sede).\n\nSolicita un turno. Validaciones aplicadas:\n\n- La hora debe caer dentro de un rango de la agenda del médico para esa fecha, especialidad y sede.\n- No debe existir otro turno `confirmado` en el mismo horario.\n- La cobertura se toma siempre de la registrada por el paciente y no puede pisarse desde el body.\n- El turno se crea con `estado = \"confirmado\"` y genera una notificación para el paciente.\n\n**Body (JSON)**\n\n- `id_especialidad` (entero, requerido)\n- `id_sede` (entero, requerido)\n- `id_medico` (entero, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `hora` (string `HH:MM`, requerido)\n- `nota` (string, requerido, máx. 40)\n- `id_paciente` (entero) — solo lo envía el operador. Si lo solicita el paciente se ignora y se usa el id del token.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — turno confirmado.\n- `400` — faltan datos, el paciente no es válido, o el horario no está disponible en la agenda del médico.\n- `401` — sin token.\n- `403` — rol no permitido, o el operador intenta solicitar el turno en una sede que no es la suya.\n- `409` — ya existe un turno confirmado en ese horario.\n- `500` — error interno."
           }
         },
         {
@@ -917,21 +1620,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_operador}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_operador}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 2,\n  \"id_medico\": 3,\n  \"id_paciente\": 2,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"17:00\",\n  \"nota\": \"En representacion\"\n}"
             },
-            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+            "url": {
+              "raw": "{{base_url}}/turnos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos"
+              ]
+            },
+            "description": "**Rol:** `paciente` (para sí mismo) u `operador` (en representación de un paciente, solo en su propia sede).\n\nSolicita un turno. Validaciones aplicadas:\n\n- La hora debe caer dentro de un rango de la agenda del médico para esa fecha, especialidad y sede.\n- No debe existir otro turno `confirmado` en el mismo horario.\n- La cobertura se toma siempre de la registrada por el paciente y no puede pisarse desde el body.\n- El turno se crea con `estado = \"confirmado\"` y genera una notificación para el paciente.\n\n**Body (JSON)**\n\n- `id_especialidad` (entero, requerido)\n- `id_sede` (entero, requerido)\n- `id_medico` (entero, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `hora` (string `HH:MM`, requerido)\n- `nota` (string, requerido, máx. 40)\n- `id_paciente` (entero) — solo lo envía el operador. Si lo solicita el paciente se ignora y se usa el id del token.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — turno confirmado.\n- `400` — faltan datos, el paciente no es válido, o el horario no está disponible en la agenda del médico.\n- `401` — sin token.\n- `403` — rol no permitido, o el operador intenta solicitar el turno en una sede que no es la suya.\n- `409` — ya existe un turno confirmado en ese horario.\n- `500` — error interno."
           }
         },
         {
@@ -954,14 +1674,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_operador}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_operador}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id_especialidad\": 1,\n  \"id_sede\": 1,\n  \"id_medico\": 3,\n  \"id_paciente\": 2,\n  \"fecha\": \"2025-10-20\",\n  \"hora\": \"17:00\",\n  \"nota\": \"En representacion\"\n}"
             },
-            "url": { "raw": "{{base_url}}/turnos", "host": ["{{base_url}}"], "path": ["turnos"] }
+            "url": {
+              "raw": "{{base_url}}/turnos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos"
+              ]
+            },
+            "description": "**Rol:** `paciente` (para sí mismo) u `operador` (en representación de un paciente, solo en su propia sede).\n\nSolicita un turno. Validaciones aplicadas:\n\n- La hora debe caer dentro de un rango de la agenda del médico para esa fecha, especialidad y sede.\n- No debe existir otro turno `confirmado` en el mismo horario.\n- La cobertura se toma siempre de la registrada por el paciente y no puede pisarse desde el body.\n- El turno se crea con `estado = \"confirmado\"` y genera una notificación para el paciente.\n\n**Body (JSON)**\n\n- `id_especialidad` (entero, requerido)\n- `id_sede` (entero, requerido)\n- `id_medico` (entero, requerido)\n- `fecha` (string `AAAA-MM-DD`, requerido)\n- `hora` (string `HH:MM`, requerido)\n- `nota` (string, requerido, máx. 40)\n- `id_paciente` (entero) — solo lo envía el operador. Si lo solicita el paciente se ignora y se usa el id del token.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — turno confirmado.\n- `400` — faltan datos, el paciente no es válido, o el horario no está disponible en la agenda del médico.\n- `401` — sin token.\n- `403` — rol no permitido, o el operador intenta solicitar el turno en una sede que no es la suya.\n- `409` — ya existe un turno confirmado en ese horario.\n- `500` — error interno."
           }
         },
         {
@@ -971,14 +1706,31 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{base_url}}/turnos/mios", "host": ["{{base_url}}"], "path": ["turnos", "mios"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/turnos/mios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos",
+                "mios"
+              ]
+            },
+            "description": "**Rol:** `paciente`.\n\nDevuelve los turnos del paciente autenticado, ordenados del más próximo al menos próximo.\n\n**Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de turnos con médico, sede y especialidad.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -988,19 +1740,37 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/turnos/medico?fecha=2025-10-20",
-              "host": ["{{base_url}}"],
-              "path": ["turnos", "medico"],
-              "query": [{ "key": "fecha", "value": "2025-10-20" }]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos",
+                "medico"
+              ],
+              "query": [
+                {
+                  "key": "fecha",
+                  "value": "2025-10-20"
+                }
+              ]
+            },
+            "description": "**Rol:** `medico`.\n\nTurnos programados del médico autenticado para una fecha, ordenados por hora.\n\n**Parámetros de consulta**\n\n- `fecha` (string `AAAA-MM-DD`, **requerido**)\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de turnos de esa fecha.\n- `400` — falta el parámetro `fecha`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -1010,19 +1780,37 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_operador}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_operador}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/turnos/sede?fecha=2025-10-20",
-              "host": ["{{base_url}}"],
-              "path": ["turnos", "sede"],
-              "query": [{ "key": "fecha", "value": "2025-10-20" }]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos",
+                "sede"
+              ],
+              "query": [
+                {
+                  "key": "fecha",
+                  "value": "2025-10-20"
+                }
+              ]
+            },
+            "description": "**Rol:** `operador`.\n\nTurnos de la sede del operador autenticado para una fecha, ordenados por hora.\n\n**Parámetros de consulta**\n\n- `fecha` (string `AAAA-MM-DD`, **requerido**)\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de turnos de esa fecha.\n- `400` — falta el parámetro `fecha`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -1032,14 +1820,32 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{base_url}}/turnos/{{turno_id}}/cancelar", "host": ["{{base_url}}"], "path": ["turnos", "{{turno_id}}", "cancelar"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/turnos/{{turno_id}}/cancelar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos",
+                "{{turno_id}}",
+                "cancelar"
+              ]
+            },
+            "description": "**Rol:** `paciente` (solo sus propios turnos), `operador` y `medico` (turnos de su propia sede).\n\nCambia el estado del turno a `cancelado`. Solo se puede cancelar un turno en estado `confirmado`. Genera una notificación para el paciente y otra para el médico.\n\n**Parámetros de ruta:** `id` (entero) — identificador del turno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { id, estado: \"cancelado\" }`.\n- `401` — sin token.\n- `403` — el turno no es del paciente, o no pertenece a la sede del operador o médico.\n- `404` — el turno no existe.\n- `409` — el turno no está en estado `confirmado`.\n- `500` — error interno."
           }
         },
         {
@@ -1049,14 +1855,32 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+                "exec": [
+                  "pm.test('status 409', function () { pm.response.to.have.status(409); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{base_url}}/turnos/{{turno_id}}/cancelar", "host": ["{{base_url}}"], "path": ["turnos", "{{turno_id}}", "cancelar"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/turnos/{{turno_id}}/cancelar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos",
+                "{{turno_id}}",
+                "cancelar"
+              ]
+            },
+            "description": "**Rol:** `paciente` (solo sus propios turnos), `operador` y `medico` (turnos de su propia sede).\n\nCambia el estado del turno a `cancelado`. Solo se puede cancelar un turno en estado `confirmado`. Genera una notificación para el paciente y otra para el médico.\n\n**Parámetros de ruta:** `id` (entero) — identificador del turno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { id, estado: \"cancelado\" }`.\n- `401` — sin token.\n- `403` — el turno no es del paciente, o no pertenece a la sede del operador o médico.\n- `404` — el turno no existe.\n- `409` — el turno no está en estado `confirmado`.\n- `500` — error interno."
           }
         },
         {
@@ -1066,14 +1890,32 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
-            "url": { "raw": "{{base_url}}/turnos/{{turno_id_2}}/atender", "host": ["{{base_url}}"], "path": ["turnos", "{{turno_id_2}}", "atender"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/turnos/{{turno_id_2}}/atender",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos",
+                "{{turno_id_2}}",
+                "atender"
+              ]
+            },
+            "description": "**Rol:** `medico`, y el turno debe pertenecer a su propia agenda.\n\nCambia el estado del turno a `atendido`. Solo se puede atender un turno en estado `confirmado`. Genera una notificación para el paciente. La carga del historial clínico se hace después con `POST /historial`; ambos registros quedan asociados por `id_turno`.\n\n**Parámetros de ruta:** `id` (entero). **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { id, estado: \"atendido\" }`.\n- `401` / `403` — sin token, rol no permitido, o el turno no es del médico autenticado.\n- `404` — el turno no existe.\n- `409` — el turno no está en estado `confirmado`.\n- `500` — error interno."
           }
         },
         {
@@ -1083,21 +1925,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 201', function () { pm.response.to.have.status(201); });"]
+                "exec": [
+                  "pm.test('status 201', function () { pm.response.to.have.status(201); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_medico}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id_turno\": {{turno_id_2}},\n  \"diagnostico\": \"Control general\",\n  \"tratamiento\": \"Ninguno\",\n  \"observaciones\": \"Paciente sano\"\n}"
             },
-            "url": { "raw": "{{base_url}}/historial", "host": ["{{base_url}}"], "path": ["historial"] }
+            "url": {
+              "raw": "{{base_url}}/historial",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "historial"
+              ]
+            },
+            "description": "**Rol:** `medico`, únicamente sobre turnos que él mismo atendió.\n\nRegistra el diagnóstico, tratamiento y observaciones de un turno atendido. El turno debe estar en estado `atendido` y no se admite más de un historial por turno.\n\n**Body (JSON)**\n\n- `id_turno` (entero, requerido)\n- `diagnostico` (string, requerido, máx. 255)\n- `tratamiento` (string, opcional, máx. 255)\n- `observaciones` (string, opcional, máx. 255)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — historial registrado.\n- `400` — faltan datos, o el turno no está en estado `atendido`.\n- `401` / `403` — sin token, rol no permitido, o el turno no fue atendido por el médico autenticado.\n- `404` — el turno no existe.\n- `409` — ya existe un historial para ese turno.\n- `500` — error interno."
           }
         },
         {
@@ -1107,21 +1966,38 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 409', function () { pm.response.to.have.status(409); });"]
+                "exec": [
+                  "pm.test('status 409', function () { pm.response.to.have.status(409); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token_medico}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id_turno\": {{turno_id_2}},\n  \"diagnostico\": \"Duplicado\"\n}"
             },
-            "url": { "raw": "{{base_url}}/historial", "host": ["{{base_url}}"], "path": ["historial"] }
+            "url": {
+              "raw": "{{base_url}}/historial",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "historial"
+              ]
+            },
+            "description": "**Rol:** `medico`, únicamente sobre turnos que él mismo atendió.\n\nRegistra el diagnóstico, tratamiento y observaciones de un turno atendido. El turno debe estar en estado `atendido` y no se admite más de un historial por turno.\n\n**Body (JSON)**\n\n- `id_turno` (entero, requerido)\n- `diagnostico` (string, requerido, máx. 255)\n- `tratamiento` (string, opcional, máx. 255)\n- `observaciones` (string, opcional, máx. 255)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — historial registrado.\n- `400` — faltan datos, o el turno no está en estado `atendido`.\n- `401` / `403` — sin token, rol no permitido, o el turno no fue atendido por el médico autenticado.\n- `404` — el turno no existe.\n- `409` — ya existe un historial para ese turno.\n- `500` — error interno."
           }
         },
         {
@@ -1131,18 +2007,31 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/historial/{{paciente_id_test}}",
-              "host": ["{{base_url}}"],
-              "path": ["historial", "{{paciente_id_test}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "historial",
+                "{{paciente_id_test}}"
+              ]
+            },
+            "description": "**Rol:** `paciente` (solo su propio historial completo) o `medico` (solo los registros de los turnos que él mismo atendió).\n\nConsulta el historial clínico de un paciente, ordenado de más reciente a más antiguo.\n\n**Parámetros de ruta:** `idPaciente` (entero) — identificador del paciente. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros de historial.\n- `401` — sin token.\n- `403` — un paciente intenta consultar el historial de otro paciente.\n- `500` — error interno."
           }
         },
         {
@@ -1152,18 +2041,31 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/historial/{{paciente_id_test}}",
-              "host": ["{{base_url}}"],
-              "path": ["historial", "{{paciente_id_test}}"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "historial",
+                "{{paciente_id_test}}"
+              ]
+            },
+            "description": "**Rol:** `paciente` (solo su propio historial completo) o `medico` (solo los registros de los turnos que él mismo atendió).\n\nConsulta el historial clínico de un paciente, ordenado de más reciente a más antiguo.\n\n**Parámetros de ruta:** `idPaciente` (entero) — identificador del paciente. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros de historial.\n- `401` — sin token.\n- `403` — un paciente intenta consultar el historial de otro paciente.\n- `500` — error interno."
           }
         },
         {
@@ -1173,14 +2075,31 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{base_url}}/historial/2", "host": ["{{base_url}}"], "path": ["historial", "2"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/historial/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "historial",
+                "2"
+              ]
+            },
+            "description": "**Rol:** `paciente` (solo su propio historial completo) o `medico` (solo los registros de los turnos que él mismo atendió).\n\nConsulta el historial clínico de un paciente, ordenado de más reciente a más antiguo.\n\n**Parámetros de ruta:** `idPaciente` (entero) — identificador del paciente. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros de historial.\n- `401` — sin token.\n- `403` — un paciente intenta consultar el historial de otro paciente.\n- `500` — error interno."
           }
         },
         {
@@ -1202,8 +2121,22 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{base_url}}/notificaciones", "host": ["{{base_url}}"], "path": ["notificaciones"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notificaciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notificaciones"
+              ]
+            },
+            "description": "**Rol:** cualquier rol autenticado, que ve únicamente las propias.\n\nLista las notificaciones del usuario autenticado, de más reciente a más antigua. Las notificaciones no se crean por endpoint: se generan internamente al confirmar, cancelar o atender un turno, siempre con `leida = 0`.\n\n**Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, id_usuario, tipo, mensaje, leida, fecha }`.\n- `401` — sin token.\n- `500` — error interno."
           }
         },
         {
@@ -1213,18 +2146,32 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"]
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/notificaciones/{{notificacion_id}}/leida",
-              "host": ["{{base_url}}"],
-              "path": ["notificaciones", "{{notificacion_id}}", "leida"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notificaciones",
+                "{{notificacion_id}}",
+                "leida"
+              ]
+            },
+            "description": "**Rol:** cualquier rol autenticado, únicamente sobre sus propias notificaciones.\n\nMarca una notificación como leída (`leida = 1`).\n\n**Parámetros de ruta:** `id` (entero) — identificador de la notificación. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { id, leida: true }`.\n- `401` — sin token.\n- `403` — la notificación pertenece a otro usuario.\n- `404` — la notificación no existe.\n- `500` — error interno."
           }
         },
         {
@@ -1234,18 +2181,32 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test('status 403', function () { pm.response.to.have.status(403); });"]
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
               }
             }
           ],
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token_medico}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/notificaciones/{{notificacion_id}}/leida",
-              "host": ["{{base_url}}"],
-              "path": ["notificaciones", "{{notificacion_id}}", "leida"]
-            }
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notificaciones",
+                "{{notificacion_id}}",
+                "leida"
+              ]
+            },
+            "description": "**Rol:** cualquier rol autenticado, únicamente sobre sus propias notificaciones.\n\nMarca una notificación como leída (`leida = 1`).\n\n**Parámetros de ruta:** `id` (entero) — identificador de la notificación. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { id, leida: true }`.\n- `401` — sin token.\n- `403` — la notificación pertenece a otro usuario.\n- `404` — la notificación no existe.\n- `500` — error interno."
           }
         },
         {
@@ -1253,10 +2214,603 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{base_url}}/notificaciones", "host": ["{{base_url}}"], "path": ["notificaciones"] }
+            "url": {
+              "raw": "{{base_url}}/notificaciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notificaciones"
+              ]
+            },
+            "description": "**Rol:** cualquier rol autenticado, que ve únicamente las propias.\n\nLista las notificaciones del usuario autenticado, de más reciente a más antigua. Las notificaciones no se crean por endpoint: se generan internamente al confirmar, cancelar o atender un turno, siempre con `leida = 0`.\n\n**Parámetros:** ninguno. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de `{ id, id_usuario, tipo, mensaje, leida, fecha }`.\n- `401` — sin token.\n- `500` — error interno."
           }
         }
-      ]
+      ],
+      "description": "Alta, cancelación y atención de turnos, historial clínico y notificaciones. Incluye los tres casos que pide la consigna: un turno rechazado por horario no disponible, un turno cancelado que genera notificación, y un turno atendido con su historial clínico asociado."
+    },
+    {
+      "name": "Semana 4 - Auditoría y reportes (solo admin)",
+      "item": [
+        {
+          "name": "Auditoría - Listar todos los registros (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auditoria",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auditoria"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nConsulta el log de auditoría. Los registros se generan automáticamente, desde un middleware, en cada alta, modificación o baja sobre `usuario`, `sede`, `especialidad` y `cobertura`; los controladores no contienen código de auditoría.\n\nCada registro guarda quién realizó la acción (`id_usuario`), qué acción fue (`ALTA`, `MODIFICACION` o `BAJA`), sobre qué entidad, sobre qué id y un detalle descriptivo. Se devuelve de más reciente a más antiguo.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_usuario` (entero) — filtra por el usuario que realizó la acción.\n- `entidad` (string) — `usuario`, `sede`, `especialidad` o `cobertura`.\n- `desde` (string `AAAA-MM-DD`) — incluye el día completo.\n- `hasta` (string `AAAA-MM-DD`) — incluye el día completo.\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros, con los datos del usuario responsable.\n- `400` — `desde` o `hasta` no tienen formato `AAAA-MM-DD`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('devuelve registros generados automaticamente', function () {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.expect(jsonData.datos).to.be.an(\"array\");",
+                  "  pm.expect(jsonData.datos.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Auditoría - Filtrar por entidad sede (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auditoria?entidad=sede",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auditoria"
+              ],
+              "query": [
+                {
+                  "key": "entidad",
+                  "value": "sede"
+                }
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nConsulta el log de auditoría. Los registros se generan automáticamente, desde un middleware, en cada alta, modificación o baja sobre `usuario`, `sede`, `especialidad` y `cobertura`; los controladores no contienen código de auditoría.\n\nCada registro guarda quién realizó la acción (`id_usuario`), qué acción fue (`ALTA`, `MODIFICACION` o `BAJA`), sobre qué entidad, sobre qué id y un detalle descriptivo. Se devuelve de más reciente a más antiguo.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_usuario` (entero) — filtra por el usuario que realizó la acción.\n- `entidad` (string) — `usuario`, `sede`, `especialidad` o `cobertura`.\n- `desde` (string `AAAA-MM-DD`) — incluye el día completo.\n- `hasta` (string `AAAA-MM-DD`) — incluye el día completo.\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros, con los datos del usuario responsable.\n- `400` — `desde` o `hasta` no tienen formato `AAAA-MM-DD`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('todos los registros son de la entidad sede', function () {",
+                  "  var jsonData = pm.response.json();",
+                  "  jsonData.datos.forEach(function (log) { pm.expect(log.entidad).to.eql(\"sede\"); });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Auditoría - Filtrar por usuario y rango de fechas (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auditoria?id_usuario=4&desde=2025-01-01&hasta=2030-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auditoria"
+              ],
+              "query": [
+                {
+                  "key": "id_usuario",
+                  "value": "4"
+                },
+                {
+                  "key": "desde",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2030-12-31"
+                }
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nConsulta el log de auditoría. Los registros se generan automáticamente, desde un middleware, en cada alta, modificación o baja sobre `usuario`, `sede`, `especialidad` y `cobertura`; los controladores no contienen código de auditoría.\n\nCada registro guarda quién realizó la acción (`id_usuario`), qué acción fue (`ALTA`, `MODIFICACION` o `BAJA`), sobre qué entidad, sobre qué id y un detalle descriptivo. Se devuelve de más reciente a más antiguo.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_usuario` (entero) — filtra por el usuario que realizó la acción.\n- `entidad` (string) — `usuario`, `sede`, `especialidad` o `cobertura`.\n- `desde` (string `AAAA-MM-DD`) — incluye el día completo.\n- `hasta` (string `AAAA-MM-DD`) — incluye el día completo.\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros, con los datos del usuario responsable.\n- `400` — `desde` o `hasta` no tienen formato `AAAA-MM-DD`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Auditoría - Fecha con formato inválido (400 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auditoria?desde=01-01-2025",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auditoria"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "01-01-2025"
+                }
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nConsulta el log de auditoría. Los registros se generan automáticamente, desde un middleware, en cada alta, modificación o baja sobre `usuario`, `sede`, `especialidad` y `cobertura`; los controladores no contienen código de auditoría.\n\nCada registro guarda quién realizó la acción (`id_usuario`), qué acción fue (`ALTA`, `MODIFICACION` o `BAJA`), sobre qué entidad, sobre qué id y un detalle descriptivo. Se devuelve de más reciente a más antiguo.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_usuario` (entero) — filtra por el usuario que realizó la acción.\n- `entidad` (string) — `usuario`, `sede`, `especialidad` o `cobertura`.\n- `desde` (string `AAAA-MM-DD`) — incluye el día completo.\n- `hasta` (string `AAAA-MM-DD`) — incluye el día completo.\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros, con los datos del usuario responsable.\n- `400` — `desde` o `hasta` no tienen formato `AAAA-MM-DD`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Auditoría - Con rol médico (403 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medico}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auditoria",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auditoria"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nConsulta el log de auditoría. Los registros se generan automáticamente, desde un middleware, en cada alta, modificación o baja sobre `usuario`, `sede`, `especialidad` y `cobertura`; los controladores no contienen código de auditoría.\n\nCada registro guarda quién realizó la acción (`id_usuario`), qué acción fue (`ALTA`, `MODIFICACION` o `BAJA`), sobre qué entidad, sobre qué id y un detalle descriptivo. Se devuelve de más reciente a más antiguo.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_usuario` (entero) — filtra por el usuario que realizó la acción.\n- `entidad` (string) — `usuario`, `sede`, `especialidad` o `cobertura`.\n- `desde` (string `AAAA-MM-DD`) — incluye el día completo.\n- `hasta` (string `AAAA-MM-DD`) — incluye el día completo.\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros, con los datos del usuario responsable.\n- `400` — `desde` o `hasta` no tienen formato `AAAA-MM-DD`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Auditoría - Sin token (401 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auditoria",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auditoria"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nConsulta el log de auditoría. Los registros se generan automáticamente, desde un middleware, en cada alta, modificación o baja sobre `usuario`, `sede`, `especialidad` y `cobertura`; los controladores no contienen código de auditoría.\n\nCada registro guarda quién realizó la acción (`id_usuario`), qué acción fue (`ALTA`, `MODIFICACION` o `BAJA`), sobre qué entidad, sobre qué id y un detalle descriptivo. Se devuelve de más reciente a más antiguo.\n\n**Parámetros de consulta (todos opcionales y combinables)**\n\n- `id_usuario` (entero) — filtra por el usuario que realizó la acción.\n- `entidad` (string) — `usuario`, `sede`, `especialidad` o `cobertura`.\n- `desde` (string `AAAA-MM-DD`) — incluye el día completo.\n- `hasta` (string `AAAA-MM-DD`) — incluye el día completo.\n\n**Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — array de registros, con los datos del usuario responsable.\n- `400` — `desde` o `hasta` no tienen formato `AAAA-MM-DD`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Turnos por especialidad (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reportes/turnos-por-especialidad",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "turnos-por-especialidad"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nCantidad de turnos agrupados por especialidad, ordenados de mayor a menor. Se resuelve con una consulta agregada sobre `turno`, `agenda` y `especialidad`.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, especialidades: [ { id_especialidad, descripcion, cantidad } ] }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('devuelve el agrupamiento por especialidad', function () {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.expect(jsonData.datos.especialidades).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Turnos por especialidad con rango de fechas (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reportes/turnos-por-especialidad?desde=2025-01-01&hasta=2030-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "turnos-por-especialidad"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2030-12-31"
+                }
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nCantidad de turnos agrupados por especialidad, ordenados de mayor a menor. Se resuelve con una consulta agregada sobre `turno`, `agenda` y `especialidad`.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, especialidades: [ { id_especialidad, descripcion, cantidad } ] }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Turnos por sede (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reportes/turnos-por-sede",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "turnos-por-sede"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nCantidad de turnos agrupados por sede, ordenados de mayor a menor. Se resuelve con una consulta agregada sobre `turno`, `agenda` y `sede`.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, sedes: [ { id_sede, nombre, cantidad } ] }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('devuelve el agrupamiento por sede', function () {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.expect(jsonData.datos.sedes).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Ranking de médicos por turnos atendidos (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reportes/ranking-medicos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "ranking-medicos"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nRanking completo de médicos por cantidad de turnos atendidos (no solo el primero), ordenado de mayor a menor. Considera únicamente los turnos en estado `atendido`.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, ranking: [ { id_medico, nombre, apellido, turnos_atendidos } ] }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('devuelve el ranking completo, no solo el primero', function () {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.expect(jsonData.datos.ranking).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Tasa de cancelación (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reportes/tasa-cancelacion",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "tasa-cancelacion"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nTasa de cancelación del período: turnos cancelados sobre el total de turnos. Devuelve el total, los cancelados y el porcentaje que representan, redondeado a dos decimales.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, total, cancelados, tasa_cancelacion_porcentaje }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('devuelve total, cancelados y porcentaje', function () {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.expect(jsonData.datos).to.have.property(\"total\");",
+                  "  pm.expect(jsonData.datos).to.have.property(\"cancelados\");",
+                  "  pm.expect(jsonData.datos).to.have.property(\"tasa_cancelacion_porcentaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Tasa de cancelación con rango de fechas (200 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reportes/tasa-cancelacion?desde=2025-01-01&hasta=2030-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "tasa-cancelacion"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2030-12-31"
+                }
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nTasa de cancelación del período: turnos cancelados sobre el total de turnos. Devuelve el total, los cancelados y el porcentaje que representan, redondeado a dos decimales.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, total, cancelados, tasa_cancelacion_porcentaje }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Rango invertido, desde posterior a hasta (400 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reportes/tasa-cancelacion?desde=2030-12-31&hasta=2025-01-01",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "tasa-cancelacion"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2030-12-31"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2025-01-01"
+                }
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nTasa de cancelación del período: turnos cancelados sobre el total de turnos. Devuelve el total, los cancelados y el porcentaje que representan, redondeado a dos decimales.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, total, cancelados, tasa_cancelacion_porcentaje }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 400', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Con rol operador (403 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_operador}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reportes/turnos-por-sede",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "turnos-por-sede"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nCantidad de turnos agrupados por sede, ordenados de mayor a menor. Se resuelve con una consulta agregada sobre `turno`, `agenda` y `sede`.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, sedes: [ { id_sede, nombre, cantidad } ] }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reportes - Sin token (401 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reportes/ranking-medicos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reportes",
+                "ranking-medicos"
+              ]
+            },
+            "description": "**Rol:** `admin`.\n\nRanking completo de médicos por cantidad de turnos atendidos (no solo el primero), ordenado de mayor a menor. Considera únicamente los turnos en estado `atendido`.\n\n**Parámetros de consulta (opcionales)**\n\n- `desde` (string `AAAA-MM-DD`) — límite inferior del período; si se omite, no hay límite inferior.\n- `hasta` (string `AAAA-MM-DD`) — límite superior del período; si se omite, no hay límite superior.\n\nEl filtro se aplica sobre `turno.fecha`. **Body:** ninguno.\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — `datos: { periodo: { desde, hasta }, ranking: [ { id_medico, nombre, apellido, turnos_atendidos } ] }`.\n- `400` — alguna fecha no tiene formato `AAAA-MM-DD`, o `desde` es posterior a `hasta`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Consulta del log de auditoría y endpoints de reportes y estadísticas, ambos restringidos al rol `admin`.\n\nLa auditoría se alimenta sola: los registros que devuelve esta carpeta los generaron las altas, modificaciones y bajas de las carpetas de la semana 2, sin ninguna llamada explícita desde los controladores. Conviene correr la colección completa en orden para verlos."
     }
   ]
 }

@@ -120,6 +120,32 @@ Notas y decisiones de diseño:
 - "Atender turno" y "cargar historial clínico" quedaron como **endpoints separados** (la consigna lo deja a criterio del grupo); ambos registros quedan asociados por `id_turno`.
 - Las notificaciones no tienen endpoint de alta público: se generan internamente al confirmar, cancelar o atender un turno (`src/utils/notificaciones.js`).
 
+## Endpoints (semana 4)
+
+Auditoría, reportes y cierre, sobre la rama `entrega-backend-4`.
+
+| Método | Endpoint                                | Descripción                                                        | Protegido        |
+|--------|------------------------------------------|---------------------------------------------------------------------|-------------------|
+| GET    | `/auditoria`                             | Log de acciones sensibles, filtrable por `id_usuario`, `entidad`, `desde` y `hasta` | Sí — rol `admin` |
+| GET    | `/reportes/turnos-por-especialidad`      | Cantidad de turnos agrupados por especialidad                        | Sí — rol `admin` |
+| GET    | `/reportes/turnos-por-sede`              | Cantidad de turnos agrupados por sede                                | Sí — rol `admin` |
+| GET    | `/reportes/ranking-medicos`              | Ranking completo de médicos por turnos atendidos                     | Sí — rol `admin` |
+| GET    | `/reportes/tasa-cancelacion`             | Turnos cancelados sobre el total, con el porcentaje del período      | Sí — rol `admin` |
+
+Los cuatro reportes aceptan `desde` y `hasta` (formato `AAAA-MM-DD`, ambos opcionales y combinables) como filtro sobre la fecha del turno, y devuelven el período aplicado junto con los datos.
+
+Notas y decisiones de diseño:
+- **La auditoría no se llama desde los controladores.** Se resuelve con el middleware `auditar(entidad)` (`src/middlewares/auditoria.js`), montado a nivel de router sobre sedes, especialidades, coberturas y usuarios. El middleware envuelve `res.json`, y cuando la respuesta es exitosa deriva la acción del método HTTP (`POST` → `ALTA`, `PUT` → `MODIFICACION`, `DELETE` → `BAJA`) y registra el log. Así se cumple el criterio de que no haya código repetido en cada endpoint.
+- Si el registro de auditoría falla, se loguea el error pero no se rompe la operación principal, que ya fue respondida.
+- En el alta pública de pacientes (`POST /auth/registro`) no hay usuario autenticado: el responsable de la acción es el propio usuario que acaba de crearse. Es el único caso en que `id_usuario` no sale del token.
+- El detalle nunca incluye la contraseña, y se recorta a los 255 caracteres que admite la columna.
+
+## Cierre y pulido
+
+Además de lo pedido por las consignas semanales:
+- **Manejador global de errores** en `src/app.js`: un body con JSON malformado devolvía el error HTML por defecto de Express, rompiendo el formato uniforme. Ahora responde `400` con la estructura de siempre, y cualquier error no previsto responde `500` con la misma forma.
+- **Fechas sin desplazamiento de zona horaria**: el pool usa `dateStrings: true`, de modo que las columnas `DATE` viajan como `AAAA-MM-DD` en lugar de convertirse a un timestamp UTC que corría el día según la zona horaria del cliente.
+
 ## Formato de respuesta
 
 Todas las respuestas siguen la estructura uniforme definida en el enunciado general:
@@ -136,13 +162,19 @@ Todas las respuestas siguen la estructura uniforme definida en el enunciado gene
 
 - `verificarToken` (`src/middlewares/auth.js`): responde `401` si falta el token o es inválido/vencido. Probado en `/auth/perfil` y `/auth/panel-admin`.
 - `verificarRol(...roles)`: responde `403` si el rol del usuario no está permitido para el endpoint. Probado en `/auth/panel-admin` (solo rol `admin`).
+- `auditar(entidad)` (`src/middlewares/auditoria.js`): registra automáticamente las altas, bajas y modificaciones de la entidad indicada en `log_auditoria`, sin que los controladores tengan que llamarlo.
 
-## Postman
+## Documentación de la API (Postman)
 
-Colección en [`postman/clinica.postman_collection.json`](postman/clinica.postman_collection.json), organizada en carpetas:
+La documentación completa de la API está en la colección [`postman/clinica.postman_collection.json`](postman/clinica.postman_collection.json). **Cada uno de los 75 requests** incluye, en su pestaña de documentación, el rol que puede acceder al endpoint, los parámetros de ruta y de consulta, el body esperado y todas las respuestas posibles de éxito y error. La colección y cada carpeta tienen además su propia descripción.
 
-- **Semana 1 — Setup y autenticación**: `health`, `coberturas`, `registro`, `login`, `perfil`, `panel-admin` (con los tres roles y casos 401/403).
-- **Semana 2 — Sedes / Especialidades / Coberturas / Agenda médica**: alta, listado, modificación y baja de cada entidad, con los casos de rol no autorizado (403) y de eliminación con dependencias (409).
-- **Semana 3 — Turnos, historial y notificaciones**: alta de turno con horario disponible, alta rechazada por horario ocupado (409) y por horario fuera de agenda (400), cancelación con notificación generada, atención de turno con su historial clínico asociado, consultas de historial con las restricciones de acceso, y listado/marcado de notificaciones.
+Está organizada en siete carpetas:
 
-Se puede correr **toda la colección de punta a punta con "Run Collection"** sobre una base recién importada: los tokens (`token`, `token_admin`, `token_medico`, `token_operador`) y los IDs creados en cada alta (`sede_id`, `especialidad_id`, `cobertura_id`, `agenda_id`, `turno_id`, `turno_id_2`, `notificacion_id`, `paciente_id_test`) se guardan solos en variables de colección a partir de las respuestas, sin pasos manuales. Verificado corriendo la colección completa (60/60 requests) contra una base recién importada.
+- **Semana 1 — Setup y autenticación** (12): `health`, `coberturas`, `registro`, `login`, `perfil`, `panel-admin`, con los casos 401 y 403.
+- **Semana 2 — Sedes** (7), **Especialidades** (6), **Coberturas** (5) y **Agenda médica** (10): alta, listado, modificación y baja de cada entidad, con los casos de rol no autorizado (403) y de eliminación con dependencias (409).
+- **Semana 3 — Turnos, historial y notificaciones** (20): alta de turno, rechazo por horario ocupado (409) y fuera de agenda (400), cancelación con notificación, atención con historial asociado, y las restricciones de acceso al historial.
+- **Semana 4 — Auditoría y reportes** (15): consulta del log con cada filtro, los cuatro reportes con y sin rango de fechas, y los casos 400, 401 y 403.
+
+Se puede correr **de punta a punta con "Run Collection"** sobre una base recién importada: los tokens (`token`, `token_admin`, `token_medico`, `token_operador`) y los IDs creados en cada alta se guardan solos en variables de colección a partir de las respuestas, sin pasos manuales.
+
+Conviene reimportar la base antes de correrla, para que los reportes y el log de auditoría partan de los datos de prueba conocidos.

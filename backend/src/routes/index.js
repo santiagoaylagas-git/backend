@@ -8,6 +8,8 @@ const agendaRoutes = require('./agendaRoutes');
 const turnoRoutes = require('./turnoRoutes');
 const historialRoutes = require('./historialRoutes');
 const notificacionRoutes = require('./notificacionRoutes');
+const auditoriaRoutes = require('./auditoriaRoutes');
+const reporteRoutes = require('./reporteRoutes');
 
 const router = Router();
 
@@ -20,5 +22,7 @@ router.use('/agenda', agendaRoutes);
 router.use('/turnos', turnoRoutes);
 router.use('/historial', historialRoutes);
 router.use('/notificaciones', notificacionRoutes);
+router.use('/auditoria', auditoriaRoutes);
+router.use('/reportes', reporteRoutes);
 
 module.exports = router;

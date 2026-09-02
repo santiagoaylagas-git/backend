@@ -118,12 +118,12 @@ async function cancelar(req, res) {
     await crearNotificacion(
       turno.id_paciente,
       'turno_cancelado',
-      `Tu turno del ${turno.fecha.toISOString().slice(0, 10)} a las ${turno.hora} fue cancelado.`
+      `Tu turno del ${turno.fecha} a las ${turno.hora} fue cancelado.`
     );
     await crearNotificacion(
       turno.id_medico,
       'turno_cancelado',
-      `El turno del ${turno.fecha.toISOString().slice(0, 10)} a las ${turno.hora} fue cancelado.`
+      `El turno del ${turno.fecha} a las ${turno.hora} fue cancelado.`
     );
 
     return responder(res, 200, 'ok', { id: Number(id), estado: 'cancelado' });
@@ -155,7 +155,7 @@ async function atender(req, res) {
     await crearNotificacion(
       turno.id_paciente,
       'turno_atendido',
-      `Tu turno del ${turno.fecha.toISOString().slice(0, 10)} a las ${turno.hora} fue registrado como atendido.`
+      `Tu turno del ${turno.fecha} a las ${turno.hora} fue registrado como atendido.`
     );
 
     return responder(res, 200, 'ok', { id: Number(id), estado: 'atendido' });
