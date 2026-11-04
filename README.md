@@ -46,7 +46,7 @@ backend/
 
 ## Requisitos
 
-- Node.js 18+ (probado con Node 22 y 24)
+- Node.js `^20.19.0`, `^22.12.0` o `^24.0.0` (la misma versión que exige Angular 21 para el frontend; recomendado Node 24 LTS, probado con 24.22.1 y 22)
 - MySQL o MariaDB corriendo localmente (por ejemplo, vía XAMPP)
 
 ## Setup
