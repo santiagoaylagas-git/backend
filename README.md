@@ -238,7 +238,8 @@ Ajustes hechos en el backend para cubrir las pantallas del frontend, siguiendo l
   - Al confirmar, cancelar o atender un turno se notifica al paciente, al médico y a quien realizó la acción (por ejemplo, el operador), para que su contador se actualice.
 - **`GET /historial/:idPaciente`**: incluye fecha, hora, médico, especialidad y sede del turno. El médico sigue viendo solo lo que atendió él.
 - **`GET /auth/perfil`**: incluye los nombres de la sede y la cobertura.
-- **`POST /auth/registro`**: si lo usa un operador logueado (alta de pacientes), la auditoría lo registra a él como responsable.
+- **`POST /auth/registro`**: si lo usa un operador logueado (alta de pacientes), la auditoría lo registra a él como responsable. Valida el formato de los datos con las mismas reglas que el formulario del front y la gestión de usuarios (DNI de 7 u 8 dígitos, email válido, contraseña de al menos 6 caracteres, fecha de nacimiento no futura, etc.) → `400`.
+- **Sedes, especialidades y coberturas**: el alta y la modificación validan que cada texto no supere el largo de su columna en la base (`nombre` de sede 50, `direccion` 100, `telefono` 15; `descripcion` y `nombre` de cobertura 30) → `400`, en lugar de truncarlo o fallar con `500`.
 - **`GET /auditoria`**: con `pagina` (y `limite`) responde paginado `{ registros, total, pagina, limite }`; sin `pagina` sigue devolviendo el array completo.
 
 ### Base de datos

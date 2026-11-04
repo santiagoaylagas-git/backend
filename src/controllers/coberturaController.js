@@ -1,5 +1,6 @@
 const pool = require('../database/db');
 const { responder } = require('../utils/respuesta');
+const { validarLargos } = require('../utils/validaciones');
 
 async function listar(req, res) {
   try {
@@ -19,6 +20,11 @@ async function crear(req, res) {
       return responder(res, 400, 'Falta el dato obligatorio: nombre');
     }
 
+    const errorLargo = validarLargos(req.body, { nombre: 30 });
+    if (errorLargo) {
+      return responder(res, 400, errorLargo);
+    }
+
     const [resultado] = await pool.query('INSERT INTO cobertura (nombre) VALUES (?)', [nombre]);
 
     return responder(res, 201, 'ok', { id: resultado.insertId, nombre });
@@ -35,6 +41,11 @@ async function modificar(req, res) {
 
     if (!nombre) {
       return responder(res, 400, 'Falta el dato obligatorio: nombre');
+    }
+
+    const errorLargo = validarLargos(req.body, { nombre: 30 });
+    if (errorLargo) {
+      return responder(res, 400, errorLargo);
     }
 
     const [resultado] = await pool.query('UPDATE cobertura SET nombre = ? WHERE id = ?', [nombre, id]);

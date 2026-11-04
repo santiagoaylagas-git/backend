@@ -183,7 +183,7 @@
                 "registro"
               ]
             },
-            "description": "**Rol:** público (no requiere token).\n\nRegistra un paciente. El rol se asigna siempre como `paciente` y no puede elegirse desde el body. La contraseña se guarda hasheada con bcrypt. El alta queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido)\n- `apellido` (string, requerido)\n- `dni` (string, requerido, máx. 8, único)\n- `email` (string, requerido, único)\n- `password` (string, requerido)\n- `fecha_nacimiento` (string `AAAA-MM-DD`, requerido)\n- `id_cobertura` (entero, requerido, debe existir — ver `GET /coberturas`)\n- `telefono` (string, opcional, máx. 10)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — paciente creado; `datos` con id, nombre, apellido, dni, email, rol y cobertura.\n- `400` — faltan datos obligatorios, o la cobertura indicada no existe.\n- `409` — ya existe un usuario con ese DNI o email.\n- `500` — error interno."
+            "description": "**Rol:** público (no requiere token).\n\nRegistra un paciente. El rol se asigna siempre como `paciente` y no puede elegirse desde el body. La contraseña se guarda hasheada con bcrypt. El alta queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido)\n- `apellido` (string, requerido)\n- `dni` (string, requerido, máx. 8, único)\n- `email` (string, requerido, único)\n- `password` (string, requerido)\n- `fecha_nacimiento` (string `AAAA-MM-DD`, requerido)\n- `id_cobertura` (entero, requerido, debe existir — ver `GET /coberturas`)\n- `telefono` (string, opcional, máx. 10)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — paciente creado; `datos` con id, nombre, apellido, dni, email, rol y cobertura.\n- `400` — faltan datos obligatorios, algún dato tiene formato inválido (DNI de 7 u 8 dígitos, email válido de hasta 30 caracteres, nombre y apellido de hasta 30, contraseña de al menos 6, fecha de nacimiento AAAA-MM-DD no futura, teléfono de 6 a 10 dígitos) o la cobertura indicada no existe.\n- `409` — ya existe un usuario con ese DNI o email.\n- `500` — error interno."
           }
         },
         {
@@ -529,7 +529,7 @@
                 "sedes"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nDa de alta una sede. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 50)\n- `direccion` (string, requerido, máx. 100)\n- `telefono` (string, requerido, máx. 15)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — sede creada; `datos: { id, nombre, direccion, telefono }`.\n- `400` — faltan datos obligatorios.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nDa de alta una sede. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 50)\n- `direccion` (string, requerido, máx. 100)\n- `telefono` (string, requerido, máx. 15)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — sede creada; `datos: { id, nombre, direccion, telefono }`.\n- `400` — faltan datos obligatorios, o algún campo supera su largo máximo (`nombre` 50, `direccion` 100, `telefono` 15).\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -570,7 +570,7 @@
                 "sedes"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nDa de alta una sede. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 50)\n- `direccion` (string, requerido, máx. 100)\n- `telefono` (string, requerido, máx. 15)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — sede creada; `datos: { id, nombre, direccion, telefono }`.\n- `400` — faltan datos obligatorios.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nDa de alta una sede. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 50)\n- `direccion` (string, requerido, máx. 100)\n- `telefono` (string, requerido, máx. 15)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — sede creada; `datos: { id, nombre, direccion, telefono }`.\n- `400` — faltan datos obligatorios, o algún campo supera su largo máximo (`nombre` 50, `direccion` 100, `telefono` 15).\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -662,7 +662,7 @@
                 "{{sede_id}}"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nModifica una sede existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido)\n- `direccion` (string, requerido)\n- `telefono` (string, requerido)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — sede modificada.\n- `400` — faltan datos obligatorios.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la sede no existe.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nModifica una sede existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido)\n- `direccion` (string, requerido)\n- `telefono` (string, requerido)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — sede modificada.\n- `400` — faltan datos obligatorios, o algún campo supera su largo máximo (`nombre` 50, `direccion` 100, `telefono` 15).\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la sede no existe.\n- `500` — error interno."
           }
         },
         {
@@ -781,7 +781,7 @@
                 "especialidades"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nDa de alta una especialidad. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — especialidad creada; `datos: { id, descripcion }`.\n- `400` — falta `descripcion`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nDa de alta una especialidad. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — especialidad creada; `datos: { id, descripcion }`.\n- `400` — falta `descripcion` o supera los 30 caracteres.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -822,7 +822,7 @@
                 "especialidades"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nDa de alta una especialidad. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — especialidad creada; `datos: { id, descripcion }`.\n- `400` — falta `descripcion`.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nDa de alta una especialidad. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — especialidad creada; `datos: { id, descripcion }`.\n- `400` — falta `descripcion` o supera los 30 caracteres.\n- `401` / `403` — sin token o rol no permitido.\n- `500` — error interno."
           }
         },
         {
@@ -897,7 +897,7 @@
                 "{{especialidad_id}}"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nModifica una especialidad existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — especialidad modificada.\n- `400` — falta `descripcion`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la especialidad no existe.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nModifica una especialidad existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero).\n\n**Body (JSON)**\n\n- `descripcion` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — especialidad modificada.\n- `400` — falta `descripcion` o supera los 30 caracteres.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la especialidad no existe.\n- `500` — error interno."
           }
         },
         {
@@ -1016,7 +1016,7 @@
                 "coberturas"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nDa de alta una cobertura. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — cobertura creada; `datos: { id, nombre }`.\n- `400` — falta `nombre`.\n- `401` — token ausente o inválido.\n- `403` — el rol no es `admin`.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nDa de alta una cobertura. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — cobertura creada; `datos: { id, nombre }`.\n- `400` — falta `nombre` o supera los 30 caracteres.\n- `401` — token ausente o inválido.\n- `403` — el rol no es `admin`.\n- `500` — error interno."
           }
         },
         {
@@ -1042,7 +1042,7 @@
                 "coberturas"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nDa de alta una cobertura. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — cobertura creada; `datos: { id, nombre }`.\n- `400` — falta `nombre`.\n- `401` — token ausente o inválido.\n- `403` — el rol no es `admin`.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nDa de alta una cobertura. Queda registrada en el log de auditoría (semana 4).\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `201` — cobertura creada; `datos: { id, nombre }`.\n- `400` — falta `nombre` o supera los 30 caracteres.\n- `401` — token ausente o inválido.\n- `403` — el rol no es `admin`.\n- `500` — error interno."
           }
         },
         {
@@ -1084,7 +1084,7 @@
                 "{{cobertura_id}}"
               ]
             },
-            "description": "**Rol:** `admin`.\n\nModifica una cobertura existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero) — identificador de la cobertura.\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — cobertura modificada.\n- `400` — falta `nombre`.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la cobertura no existe.\n- `500` — error interno."
+            "description": "**Rol:** `admin`.\n\nModifica una cobertura existente. Queda registrada en el log de auditoría (semana 4).\n\n**Parámetros de ruta:** `id` (entero) — identificador de la cobertura.\n\n**Body (JSON)**\n\n- `nombre` (string, requerido, máx. 30)\n\n**Respuestas**\n\nTodas siguen la estructura uniforme `{ \"codigo\", \"estado\", \"datos\" }`.\n\n- `200` — cobertura modificada.\n- `400` — falta `nombre` o supera los 30 caracteres.\n- `401` / `403` — sin token o rol no permitido.\n- `404` — la cobertura no existe.\n- `500` — error interno."
           }
         },
         {

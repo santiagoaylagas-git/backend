@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../database/db');
 const { responder } = require('../utils/respuesta');
+const { validarDatosPersonales } = require('../utils/validaciones');
 
 const SALT_ROUNDS = 10;
 
@@ -11,6 +12,12 @@ async function registro(req, res) {
 
     if (!nombre || !apellido || !dni || !email || !password || !fecha_nacimiento || !id_cobertura) {
       return responder(res, 400, 'Faltan datos obligatorios: nombre, apellido, dni, email, password, fecha_nacimiento, id_cobertura');
+    }
+
+    // Mismas reglas de formato que el formulario del front y la gestion de usuarios.
+    const errorDatos = validarDatosPersonales(req.body, { passwordObligatoria: true });
+    if (errorDatos) {
+      return responder(res, 400, errorDatos);
     }
 
     const [coberturas] = await pool.query('SELECT id FROM cobertura WHERE id = ?', [id_cobertura]);

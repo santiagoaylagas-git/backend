@@ -1,5 +1,6 @@
 const pool = require('../database/db');
 const { responder } = require('../utils/respuesta');
+const { validarLargos } = require('../utils/validaciones');
 
 async function crear(req, res) {
   try {
@@ -7,6 +8,11 @@ async function crear(req, res) {
 
     if (!descripcion) {
       return responder(res, 400, 'Falta el dato obligatorio: descripcion');
+    }
+
+    const errorLargo = validarLargos(req.body, { descripcion: 30 });
+    if (errorLargo) {
+      return responder(res, 400, errorLargo);
     }
 
     const [resultado] = await pool.query(
@@ -38,6 +44,11 @@ async function modificar(req, res) {
 
     if (!descripcion) {
       return responder(res, 400, 'Falta el dato obligatorio: descripcion');
+    }
+
+    const errorLargo = validarLargos(req.body, { descripcion: 30 });
+    if (errorLargo) {
+      return responder(res, 400, errorLargo);
     }
 
     const [resultado] = await pool.query(

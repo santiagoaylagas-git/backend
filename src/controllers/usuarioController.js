@@ -1,44 +1,14 @@
 const bcrypt = require('bcrypt');
 const pool = require('../database/db');
 const { responder } = require('../utils/respuesta');
-const { esFechaValida, ahoraLocal } = require('../utils/fechas');
+const { ahoraLocal } = require('../utils/fechas');
+const { validarDatosPersonales } = require('../utils/validaciones');
 
 const SALT_ROUNDS = 10;
 // Desde la gestion de usuarios el administrador da de alta personal de la clinica;
 // los pacientes se registran solos o los da de alta un operador.
 const ROLES_ALTA = ['medico', 'operador', 'admin'];
 const ROLES_CON_SEDE = ['medico', 'operador'];
-
-// Valida los datos comunes a alta y modificacion. Devuelve el mensaje de error o null.
-function validarDatosPersonales(datos, { passwordObligatoria }) {
-  const { nombre, apellido, dni, email, fecha_nacimiento, telefono, password } = datos;
-
-  if (!nombre || !apellido || !dni || !email || !fecha_nacimiento) {
-    return 'Faltan datos obligatorios: nombre, apellido, dni, email, fecha_nacimiento';
-  }
-  if (String(nombre).length > 30 || String(apellido).length > 30) {
-    return 'El nombre y el apellido no pueden superar los 30 caracteres';
-  }
-  if (!/^\d{7,8}$/.test(String(dni))) {
-    return 'El DNI debe tener 7 u 8 dígitos numéricos';
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email)) || String(email).length > 30) {
-    return 'El email no es válido (máximo 30 caracteres)';
-  }
-  if (!esFechaValida(fecha_nacimiento) || fecha_nacimiento > ahoraLocal().fecha) {
-    return 'La fecha de nacimiento debe tener formato AAAA-MM-DD y no puede ser futura';
-  }
-  if (telefono && !/^\d{6,10}$/.test(String(telefono))) {
-    return 'El teléfono debe tener entre 6 y 10 dígitos';
-  }
-  if (passwordObligatoria && !password) {
-    return 'Falta el dato obligatorio: password';
-  }
-  if (password && String(password).length < 6) {
-    return 'La contraseña debe tener al menos 6 caracteres';
-  }
-  return null;
-}
 
 async function existeDuplicado(dni, email, idExcluido = 0) {
   const [filas] = await pool.query(
