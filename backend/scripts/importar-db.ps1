@@ -1,4 +1,5 @@
-# Crea la base de datos e importa el script provisto, leyendo las credenciales de .env.
+# Recrea la base de datos desde cero e importa el script provisto, leyendo las credenciales de .env.
+# Alternativa multiplataforma (sin XAMPP): npm run db:importar
 # Uso:  powershell -ExecutionPolicy Bypass -File scripts\importar-db.ps1
 
 $ErrorActionPreference = "Stop"
@@ -22,17 +23,14 @@ foreach ($linea in Get-Content $envFile) {
 
 $db = $config['DB_NAME']
 if ([string]::IsNullOrWhiteSpace($db)) { throw "DB_NAME vacio en .env" }
-if ([string]::IsNullOrWhiteSpace($config['DB_PASSWORD'])) {
-    throw "DB_PASSWORD esta vacio en .env. Completalo antes de correr este script."
-}
 
 # MYSQL_PWD evita que la contrasena aparezca en la linea de comandos / lista de procesos
 $env:MYSQL_PWD = $config['DB_PASSWORD']
 $comunes = @("-u", $config['DB_USER'], "-h", $config['DB_HOST'], "-P", $config['DB_PORT'])
 
 try {
-    Write-Output "Creando base '$db' si no existe..."
-    & $mysql @comunes -e "CREATE DATABASE IF NOT EXISTS ``$db`` CHARACTER SET utf8 COLLATE utf8_general_ci;"
+    Write-Output "Recreando la base '$db' desde cero..."
+    & $mysql @comunes -e "DROP DATABASE IF EXISTS ``$db``; CREATE DATABASE ``$db`` CHARACTER SET utf8 COLLATE utf8_general_ci;"
     if ($LASTEXITCODE -ne 0) { throw "Fallo la creacion de la base (codigo $LASTEXITCODE)" }
 
     Write-Output "Importando $sqlFile ..."

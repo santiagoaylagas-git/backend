@@ -62,24 +62,32 @@ async function consultar(req, res) {
       return responder(res, 403, 'Un paciente solo puede consultar su propio historial clínico');
     }
 
-    let filas;
+    const condiciones = ['historial_clinico.id_paciente = ?'];
+    const valores = [idPaciente];
+
+    // El medico solo ve los registros de los turnos que atendio el mismo.
     if (req.usuario.rol === 'medico') {
-      [filas] = await pool.query(
-        `SELECT id, id_turno, id_medico, id_paciente, diagnostico, tratamiento, observaciones, fecha_registro
-         FROM historial_clinico
-         WHERE id_paciente = ? AND id_medico = ?
-         ORDER BY fecha_registro DESC`,
-        [idPaciente, req.usuario.id]
-      );
-    } else {
-      [filas] = await pool.query(
-        `SELECT id, id_turno, id_medico, id_paciente, diagnostico, tratamiento, observaciones, fecha_registro
-         FROM historial_clinico
-         WHERE id_paciente = ?
-         ORDER BY fecha_registro DESC`,
-        [idPaciente]
-      );
+      condiciones.push('historial_clinico.id_medico = ?');
+      valores.push(req.usuario.id);
     }
+
+    const [filas] = await pool.query(
+      `SELECT historial_clinico.id, historial_clinico.id_turno, historial_clinico.id_medico,
+              historial_clinico.id_paciente, historial_clinico.diagnostico, historial_clinico.tratamiento,
+              historial_clinico.observaciones, historial_clinico.fecha_registro,
+              turno.fecha, turno.hora, turno.nota,
+              medico.nombre AS medico_nombre, medico.apellido AS medico_apellido,
+              especialidad.descripcion AS especialidad, sede.nombre AS sede
+       FROM historial_clinico
+       JOIN turno ON historial_clinico.id_turno = turno.id
+       JOIN agenda ON turno.id_agenda = agenda.id
+       JOIN usuario medico ON historial_clinico.id_medico = medico.id
+       JOIN especialidad ON agenda.id_especialidad = especialidad.id
+       JOIN sede ON agenda.id_sede = sede.id
+       WHERE ${condiciones.join(' AND ')}
+       ORDER BY turno.fecha DESC, turno.hora DESC, historial_clinico.fecha_registro DESC`,
+      valores
+    );
 
     return responder(res, 200, 'ok', filas);
   } catch (error) {

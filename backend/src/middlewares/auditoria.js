@@ -15,6 +15,8 @@ function armarDetalle(accion, entidad, datos) {
   if (datos && typeof datos === 'object') {
     const descripcion = Object.entries(datos)
       .filter(([clave]) => clave !== 'id' && clave !== 'password')
+      .filter(([, valor]) => valor !== null && valor !== undefined && valor !== '')
+      .filter(([, valor]) => !Array.isArray(valor) || valor.length > 0)
       .map(([clave, valor]) => `${clave}=${valor}`)
       .join(', ');
 

@@ -4,7 +4,7 @@ Sistema de Gestión de Turnos Médicos — Programación 2.
 
 ## Requisitos
 
-- Node.js 18+
+- Node.js 18+ (probado con Node 22 y 24)
 - MySQL o MariaDB corriendo localmente (por ejemplo, vía XAMPP)
 
 ## Setup
@@ -23,20 +23,28 @@ Sistema de Gestión de Turnos Médicos — Programación 2.
 
    Si MySQL/XAMPP corre con la configuración por defecto (usuario `root` sin contraseña), no hace falta tocar nada más que el `JWT_SECRET`.
 
-3. Crear la base de datos e importar el script provisto (`../clinica_ampliada.sql.txt`, un nivel arriba de esta carpeta).
+3. Crear la base de datos e importar el script provisto (`../clinica_ampliada.sql.txt`, un nivel arriba de esta carpeta). El script **recrea la base desde cero** cada vez que se corre.
 
-   **Opción A — script automático** (lee las credenciales del `.env`, requiere XAMPP en `C:\xampp`):
+   **Opción A — script con Node (recomendada, cualquier sistema operativo)**: usa las credenciales del `.env` y no necesita el cliente `mysql` en el PATH. Solo requiere que MySQL/MariaDB esté corriendo.
+
+   ```bash
+   npm run db:importar
+   ```
+
+   **Opción B — script de PowerShell** (requiere XAMPP en `C:\xampp`):
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File scripts\importar-db.ps1
    ```
 
-   **Opción B — manual**, desde phpMyAdmin (Importar → `clinica_ampliada.sql.txt`) o por línea de comandos:
+   **Opción C — manual**, desde phpMyAdmin (crear la base `clinica` y luego Importar → `clinica_ampliada.sql.txt`) o por línea de comandos:
 
    ```bash
-   mysql -u root -p -e "CREATE DATABASE clinica"
+   mysql -u root -p -e "DROP DATABASE IF EXISTS clinica; CREATE DATABASE clinica"
    mysql -u root -p clinica < ../clinica_ampliada.sql.txt
    ```
+
+   La agenda y los turnos de prueba se cargan con fechas **relativas al día de la importación**, así que conviene reimportar la base antes de cada demo para tener agenda y turnos "de hoy".
 
 4. Levantar el servidor en modo desarrollo:
 
@@ -48,16 +56,22 @@ Sistema de Gestión de Turnos Médicos — Programación 2.
 
 ## Usuarios de prueba (ya cargados por el script)
 
-El script de base incluye 4 usuarios con distintos roles, todos con la contraseña **`test1234`**:
+Todos usan la contraseña **`test1234`**:
 
-| DNI        | Rol       | Nombre         |
-|------------|-----------|----------------|
-| `15200548` | operador  | Juan Pérez     |
-| `36000960` | paciente  | Franco Friggeri|
-| `20111222` | médico    | Ana López      |
-| `18222333` | admin     | Marcos Gómez   |
+| DNI        | Rol       | Nombre            | Datos                                                  |
+|------------|-----------|-------------------|--------------------------------------------------------|
+| `18222333` | admin     | Marcos Gómez      | Sin sede                                               |
+| `20111222` | médico    | Ana López         | Traumatología y Clínica Médica — atiende en Sede Centro **y** Sede Norte |
+| `22333444` | médico    | Carlos Martínez   | Cardiología — Sede Norte                               |
+| `28444555` | médico    | Laura Fernández   | Pediatría y Dermatología — Sede Centro                 |
+| `15200548` | operador  | Juan Pérez        | Sede Centro                                            |
+| `33555666` | operador  | Sofía Díaz        | Sede Norte                                             |
+| `36000960` | paciente  | Franco Friggeri   | Jerárquicos                                            |
+| `40666777` | paciente  | Lucía Romero      | OSDE                                                   |
+| `17777888` | paciente  | Martín Sosa       | Swiss Medical                                          |
+| `55888999` | paciente  | Valentina Acosta  | Jerárquicos                                            |
 
-Sirven para probar `POST /auth/login` y los endpoints protegidos sin necesidad de registrar un usuario nuevo primero.
+La base trae además 3 sedes, 5 coberturas, 5 especialidades, agenda para hoy, días anteriores y próximos, y turnos en los tres estados (`confirmado`, `cancelado` y `atendido`, estos últimos con su historial clínico).
 
 ## Endpoints (semana 1)
 
@@ -146,6 +160,51 @@ Además de lo pedido por las consignas semanales:
 - **Manejador global de errores** en `src/app.js`: un body con JSON malformado devolvía el error HTML por defecto de Express, rompiendo el formato uniforme. Ahora responde `400` con la estructura de siempre, y cualquier error no previsto responde `500` con la misma forma.
 - **Fechas sin desplazamiento de zona horaria**: el pool usa `dateStrings: true`, de modo que las columnas `DATE` viajan como `AAAA-MM-DD` en lugar de convertirse a un timestamp UTC que corría el día según la zona horaria del cliente.
 
+## Cambios para la entrega del frontend
+
+Ajustes hechos en el backend para cubrir las pantallas del frontend, siguiendo las sugerencias de la consigna. Todos respetan la estructura de respuesta uniforme, están protegidos por rol y quedaron documentados en la carpeta **"Entrega frontend - Endpoints nuevos y cambios"** de la colección de Postman (37 requests con sus tests).
+
+### Endpoints nuevos
+
+| Método | Endpoint                         | Descripción                                                                                   | Protegido                         |
+|--------|-----------------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------|
+| GET    | `/medicos`                        | Médicos con sus especialidades (sin datos personales). Filtros: `id_especialidad`, `id_sede`, `disponibles=1` | Cualquier usuario con sesión      |
+| GET    | `/disponibilidad/fechas`          | Fechas (desde hoy) en que el médico tiene agenda y lugar, para `id_medico`, `id_especialidad`, `id_sede` | `paciente`, `operador`            |
+| GET    | `/disponibilidad/horarios`        | Horarios libres de un día: agenda del médico en turnos de 30 min, menos los turnos confirmados | `paciente`, `operador`            |
+| GET    | `/pacientes?q=`                   | Búsqueda de pacientes por DNI o apellido                                                      | `operador`, `medico`, `admin`     |
+| PUT    | `/auth/perfil`                    | El paciente actualiza email, contraseña (hasheada), teléfono y cobertura                       | `paciente`                        |
+| GET    | `/usuarios`                       | Listado paginado (`pagina`, `limite`) con filtros `nombre`, `apellido`, `rol`, `id_sede`      | `admin`                           |
+| GET    | `/usuarios/:id`                   | Un usuario, con las especialidades si es médico                                               | `admin`                           |
+| POST   | `/usuarios`                       | Alta de operador, médico (con especialidades) o administrador                                  | `admin` (auditado)                |
+| PUT    | `/usuarios/:id`                   | Edición de cualquier usuario, incluidas las especialidades del médico                          | `admin` (auditado)                |
+| GET    | `/auditoria/filtros`              | Usuarios con acciones registradas y entidades auditadas, para los filtros                      | `admin`                           |
+
+### Endpoints modificados
+
+- **`GET /sedes` y `GET /especialidades`**: ahora disponibles para cualquier usuario con sesión. El alta, la modificación y la baja siguen siendo exclusivas del administrador.
+- **Agenda**:
+  - El listado devuelve también `medico_nombre`, `medico_apellido`, `especialidad`, `sede` y `turnos_confirmados`; acepta además `desde` y `hasta`.
+  - El operador solo puede dar de alta, modificar y eliminar rangos de **su sede** (`403` en otro caso). Consultar otras sedes sigue permitido.
+  - Se valida que la salida sea posterior a la entrada, que la especialidad sea del médico y que el médico no tenga otro rango superpuesto ese día (en cualquier sede) → `409`.
+  - No se puede **eliminar** un rango con turnos confirmados, ni **modificarlo** dejando algún turno confirmado afuera → `409` con un mensaje claro (nunca `500`).
+  - Las altas, modificaciones y bajas de agenda también quedan en la auditoría.
+- **Turnos**:
+  - Cada turno dura **30 minutos**. El alta valida que la hora sea el inicio de un turno dentro de la agenda, la misma regla que usa `/disponibilidad/horarios`. También rechaza que el paciente tenga otro turno a la misma hora.
+  - El médico opera sobre **sus propios turnos en cualquier sede** donde atiende (reemplaza la restricción "de su propia sede" de la semana 3).
+  - `PUT /turnos/:id/atender` acepta opcionalmente `diagnostico`, `tratamiento` y `observaciones`, y registra el historial en la misma transacción. Sin body funciona como antes.
+  - Los listados (`/mios`, `/medico`, `/sede`) devuelven los nombres del paciente, médico, especialidad y sede. `/mios` incluye el historial del turno si fue atendido. `/medico` acepta `id_sede`; `/sede` acepta `id_medico` y `estado`.
+  - Al confirmar, cancelar o atender un turno se notifica al paciente, al médico y a quien realizó la acción (por ejemplo, el operador), para que su contador se actualice.
+- **`GET /historial/:idPaciente`**: incluye fecha, hora, médico, especialidad y sede del turno. El médico sigue viendo solo lo que atendió él.
+- **`GET /auth/perfil`**: incluye los nombres de la sede y la cobertura.
+- **`POST /auth/registro`**: si lo usa un operador logueado (alta de pacientes), la auditoría lo registra a él como responsable.
+- **`GET /auditoria`**: con `pagina` (y `limite`) responde paginado `{ registros, total, pagina, limite }`; sin `pagina` sigue devolviendo el array completo.
+
+### Base de datos
+
+- Las claves pasaron de `TINYINT` a `INT`: con `TINYINT` cada tabla admitía como máximo 127 registros, y las notificaciones y la auditoría lo superaban enseguida.
+- Datos de prueba ampliados (ver "Usuarios de prueba"), con fechas relativas al día de la importación.
+- Nuevo script `npm run db:importar` para recrear la base desde cero en cualquier sistema operativo.
+
 ## Formato de respuesta
 
 Todas las respuestas siguen la estructura uniforme definida en el enunciado general:
@@ -166,14 +225,15 @@ Todas las respuestas siguen la estructura uniforme definida en el enunciado gene
 
 ## Documentación de la API (Postman)
 
-La documentación completa de la API está en la colección [`postman/clinica.postman_collection.json`](postman/clinica.postman_collection.json). **Cada uno de los 75 requests** incluye, en su pestaña de documentación, el rol que puede acceder al endpoint, los parámetros de ruta y de consulta, el body esperado y todas las respuestas posibles de éxito y error. La colección y cada carpeta tienen además su propia descripción.
+La documentación completa de la API está en la colección [`postman/clinica.postman_collection.json`](postman/clinica.postman_collection.json). **Cada uno de los 112 requests** incluye, en su pestaña de documentación, el rol que puede acceder al endpoint, los parámetros de ruta y de consulta, el body esperado y todas las respuestas posibles de éxito y error. La colección y cada carpeta tienen además su propia descripción.
 
-Está organizada en siete carpetas:
+Está organizada en ocho carpetas:
 
 - **Semana 1 — Setup y autenticación** (12): `health`, `coberturas`, `registro`, `login`, `perfil`, `panel-admin`, con los casos 401 y 403.
 - **Semana 2 — Sedes** (7), **Especialidades** (6), **Coberturas** (5) y **Agenda médica** (10): alta, listado, modificación y baja de cada entidad, con los casos de rol no autorizado (403) y de eliminación con dependencias (409).
 - **Semana 3 — Turnos, historial y notificaciones** (20): alta de turno, rechazo por horario ocupado (409) y fuera de agenda (400), cancelación con notificación, atención con historial asociado, y las restricciones de acceso al historial.
 - **Semana 4 — Auditoría y reportes** (15): consulta del log con cada filtro, los cuatro reportes con y sin rango de fechas, y los casos 400, 401 y 403.
+- **Entrega frontend — Endpoints nuevos y cambios** (37): médicos, disponibilidad, búsqueda de pacientes, datos del paciente, gestión de usuarios, auditoría paginada y las nuevas validaciones de agenda y turnos.
 
 Se puede correr **de punta a punta con "Run Collection"** sobre una base recién importada: los tokens (`token`, `token_admin`, `token_medico`, `token_operador`) y los IDs creados en cada alta se guardan solos en variables de colección a partir de las respuestas, sin pasos manuales.
 

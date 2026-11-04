@@ -85,7 +85,13 @@ async function login(req, res) {
 async function perfil(req, res) {
   try {
     const [usuarios] = await pool.query(
-      'SELECT id, apellido, nombre, fecha_nacimiento, rol, email, telefono, dni, id_sede, id_cobertura FROM usuario WHERE id = ?',
+      `SELECT usuario.id, usuario.apellido, usuario.nombre, usuario.fecha_nacimiento, usuario.rol, usuario.email,
+              usuario.telefono, usuario.dni, usuario.id_sede, sede.nombre AS sede,
+              usuario.id_cobertura, cobertura.nombre AS cobertura
+       FROM usuario
+       LEFT JOIN sede ON usuario.id_sede = sede.id
+       LEFT JOIN cobertura ON usuario.id_cobertura = cobertura.id
+       WHERE usuario.id = ?`,
       [req.usuario.id]
     );
 
@@ -100,8 +106,65 @@ async function perfil(req, res) {
   }
 }
 
+// El paciente actualiza sus propios datos: solo email, contrasena, telefono y cobertura.
+// Cualquier otro campo del body se ignora.
+async function actualizarPerfil(req, res) {
+  try {
+    const { email, telefono, id_cobertura, password } = req.body;
+
+    if (!email || !id_cobertura) {
+      return responder(res, 400, 'Faltan datos obligatorios: email, id_cobertura');
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email)) || String(email).length > 30) {
+      return responder(res, 400, 'El email no es válido (máximo 30 caracteres)');
+    }
+    if (telefono && !/^\d{6,10}$/.test(String(telefono))) {
+      return responder(res, 400, 'El teléfono debe tener entre 6 y 10 dígitos');
+    }
+    if (password !== undefined && password !== null && password !== '' && String(password).length < 6) {
+      return responder(res, 400, 'La contraseña debe tener al menos 6 caracteres');
+    }
+
+    const [coberturas] = await pool.query('SELECT id FROM cobertura WHERE id = ?', [id_cobertura]);
+    if (coberturas.length === 0) {
+      return responder(res, 400, 'La cobertura indicada no existe');
+    }
+
+    const [duplicados] = await pool.query('SELECT id FROM usuario WHERE email = ? AND id <> ?', [
+      email,
+      req.usuario.id,
+    ]);
+    if (duplicados.length > 0) {
+      return responder(res, 409, 'Ya existe otro usuario con ese email');
+    }
+
+    await pool.query('UPDATE usuario SET email = ?, telefono = ?, id_cobertura = ? WHERE id = ?', [
+      email,
+      telefono || '',
+      id_cobertura,
+      req.usuario.id,
+    ]);
+
+    if (password) {
+      const passwordHash = await bcrypt.hash(String(password), SALT_ROUNDS);
+      await pool.query('UPDATE usuario SET password = ? WHERE id = ?', [passwordHash, req.usuario.id]);
+    }
+
+    return responder(res, 200, 'ok', {
+      id: req.usuario.id,
+      email,
+      telefono: telefono || '',
+      id_cobertura: Number(id_cobertura),
+      ...(password ? { cambio_password: 'si' } : {}),
+    });
+  } catch (error) {
+    console.error(error);
+    return responder(res, 500, 'Error interno al actualizar los datos personales');
+  }
+}
+
 async function panelAdmin(req, res) {
   return responder(res, 200, 'ok', { mensaje: `Acceso concedido para el rol '${req.usuario.rol}'` });
 }
 
-module.exports = { registro, login, perfil, panelAdmin };
+module.exports = { registro, login, perfil, actualizarPerfil, panelAdmin };

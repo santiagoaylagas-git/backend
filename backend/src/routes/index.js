@@ -10,6 +10,10 @@ const historialRoutes = require('./historialRoutes');
 const notificacionRoutes = require('./notificacionRoutes');
 const auditoriaRoutes = require('./auditoriaRoutes');
 const reporteRoutes = require('./reporteRoutes');
+const medicoRoutes = require('./medicoRoutes');
+const disponibilidadRoutes = require('./disponibilidadRoutes');
+const pacienteRoutes = require('./pacienteRoutes');
+const usuarioRoutes = require('./usuarioRoutes');
 
 const router = Router();
 
@@ -24,5 +28,9 @@ router.use('/historial', historialRoutes);
 router.use('/notificaciones', notificacionRoutes);
 router.use('/auditoria', auditoriaRoutes);
 router.use('/reportes', reporteRoutes);
+router.use('/medicos', medicoRoutes);
+router.use('/disponibilidad', disponibilidadRoutes);
+router.use('/pacientes', pacienteRoutes);
+router.use('/usuarios', usuarioRoutes);
 
 module.exports = router;
