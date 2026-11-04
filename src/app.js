@@ -21,6 +21,18 @@ app.use((error, req, res, next) => {
     return responder(res, 400, 'El cuerpo de la petición no es un JSON válido');
   }
 
+  // Errores del cliente detectados al leer el cuerpo (demasiado grande, codificacion
+  // no soportada, etc.): se responde su codigo 4xx real en lugar de un 500.
+  const codigo = error.status || error.statusCode;
+  if (codigo >= 400 && codigo < 500) {
+    const mensajes = {
+      'entity.too.large': 'El cuerpo de la petición es demasiado grande',
+      'charset.unsupported': 'La codificación del cuerpo de la petición no está soportada',
+      'encoding.unsupported': 'La codificación del cuerpo de la petición no está soportada',
+    };
+    return responder(res, codigo, mensajes[error.type] || 'La petición no es válida');
+  }
+
   console.error(error);
   return responder(res, 500, 'Error interno del servidor');
 });

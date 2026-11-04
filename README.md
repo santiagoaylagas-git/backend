@@ -199,7 +199,7 @@ Notas y decisiones de diseño:
 ## Cierre y pulido
 
 Además de lo pedido por las consignas semanales:
-- **Manejador global de errores** en `src/app.js`: un body con JSON malformado devolvía el error HTML por defecto de Express, rompiendo el formato uniforme. Ahora responde `400` con la estructura de siempre, y cualquier error no previsto responde `500` con la misma forma.
+- **Manejador global de errores** en `src/app.js`: un body con JSON malformado devolvía el error HTML por defecto de Express, rompiendo el formato uniforme. Ahora responde `400` con la estructura de siempre. Los demás errores del cliente al leer el cuerpo responden su código real con la misma forma (`413` si es demasiado grande, `415` si la codificación no está soportada), y cualquier error no previsto responde `500`.
 - **Fechas sin desplazamiento de zona horaria**: el pool usa `dateStrings: true`, de modo que las columnas `DATE` viajan como `AAAA-MM-DD` en lugar de convertirse a un timestamp UTC que corría el día según la zona horaria del cliente.
 
 ## Cambios para la entrega del frontend
