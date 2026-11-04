@@ -9,6 +9,11 @@ Trabajo práctico integrador de Programación 2. API REST en Node.js + Express +
 
 Frontend (Angular 21): https://github.com/santiagoaylagas-git/frontend (rama `entrega-frontend`).
 
+Guía paso a paso para levantar todo (XAMPP, Visual Studio Code / Antigravity, problemas
+frecuentes): [`GUIA-INSTALACION.md` del frontend](https://github.com/santiagoaylagas-git/frontend/blob/entrega-frontend/GUIA-INSTALACION.md).
+Este repositorio trae configuración en `.vscode/` con tareas para instalar dependencias, importar
+la base y levantar la API, y una configuración de depuración (F5).
+
 ## Inicio rápido
 
 ```bash

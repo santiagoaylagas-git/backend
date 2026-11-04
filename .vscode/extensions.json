@@ -1,0 +1,4 @@
+{
+  // Extensiones recomendadas: VS Code / Antigravity las ofrece al abrir la carpeta.
+  "recommendations": ["mtxr.sqltools", "mtxr.sqltools-driver-mysql"]
+}
