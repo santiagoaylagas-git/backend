@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 
 $raiz    = Split-Path -Parent $PSScriptRoot
 $envFile = Join-Path $raiz ".env"
-$sqlFile = Join-Path (Split-Path -Parent $raiz) "clinica_ampliada.sql.txt"
+$sqlFile = Join-Path $raiz "database\clinica_ampliada.sql.txt"
 $mysql   = "C:\xampp\mysql\bin\mysql.exe"
 
 if (-not (Test-Path $envFile)) { throw "No se encontro $envFile" }

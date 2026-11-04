@@ -6,21 +6,21 @@
       "label": "Backend: instalar dependencias",
       "type": "shell",
       "command": "npm install",
-      "options": { "cwd": "${workspaceFolder}/backend" },
+      "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": []
     },
     {
       "label": "Backend: importar base de datos (desde cero)",
       "type": "shell",
       "command": "npm run db:importar",
-      "options": { "cwd": "${workspaceFolder}/backend" },
+      "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": []
     },
     {
       "label": "Backend: levantar API (npm run dev)",
       "type": "shell",
       "command": "npm run dev",
-      "options": { "cwd": "${workspaceFolder}/backend" },
+      "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "problemMatcher": []
     }

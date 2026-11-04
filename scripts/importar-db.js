@@ -1,4 +1,4 @@
-// Crea (o recrea desde cero) la base de datos e importa ../clinica_ampliada.sql.txt.
+// Crea (o recrea desde cero) la base de datos e importa database/clinica_ampliada.sql.txt.
 // Funciona en cualquier sistema operativo: usa el driver mysql2 del propio backend,
 // por lo que no hace falta tener el cliente "mysql" en el PATH.
 // Uso:  npm run db:importar
@@ -8,7 +8,7 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 
 async function main() {
-  const archivo = path.join(__dirname, '..', '..', 'clinica_ampliada.sql.txt');
+  const archivo = path.join(__dirname, '..', 'database', 'clinica_ampliada.sql.txt');
   const nombreBase = process.env.DB_NAME;
 
   if (!nombreBase || !/^\w+$/.test(nombreBase)) {
